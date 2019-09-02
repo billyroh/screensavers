@@ -10,9 +10,14 @@
 
 */
 
+// Dimensions of the space
 const dimension = 3;
+
+// Log of all the spots that are already taken up by a pipe
 let placementMatrix = math.zeros(dimension, dimension, dimension);
-let indexArray = [];
+
+// Array that is an array of the path of a single pipe
+let pipePathArray = [];
 
 // Roll dice to determine direction
 // possible permutations:
@@ -29,6 +34,11 @@ const directionMatrix = [
   [0, 0, 1],
 ];
 
+// Check if the proposedIndex is already occupied by another segment of a pipe
+function isTaken(proposedIndex) {
+  return !!math.subset(placementMatrix, math.index(proposedIndex[0], proposedIndex[1], proposedIndex[2]));
+}
+
 function getValidNextIndexArray(currentIndex) {
   // Create all permutations of the next index
   let currentIndexMatrix = math.matrix([currentIndex, currentIndex, currentIndex, currentIndex, currentIndex, currentIndex]);
@@ -41,16 +51,15 @@ function getValidNextIndexArray(currentIndex) {
 
   // Filter out options that are already taken
   nextIndexOptionArray = _.filter(nextIndexOptionArray, (nextIndex) => {
-    let isTaken = !!math.subset(placementMatrix, math.index(nextIndex[0], nextIndex[1], nextIndex[2]));
-    return !isTaken;
+    return !isTaken(nextIndex);
   });
 
   return nextIndexOptionArray;
 }
 
-function addNextIndex(currentIndex) {
+function addNextIndex(pipePath, currentIndex) {
   // Avoid excessively long arrays
-  if (indexArray.length > 10) {
+  if (pipePath.length > 10) {
     return;
   }
 
@@ -62,16 +71,17 @@ function addNextIndex(currentIndex) {
   // Else, add the next valid path and recurse
   } else {
     let nextIndex = validNextIndexArray[_.random(0, validNextIndexArray.length - 1)];
-    indexArray.push(nextIndex);
+    pipePath.push(nextIndex);
     placementMatrix.subset(math.index(nextIndex[0], nextIndex[1], nextIndex[2]), 1);
-    addNextIndex(nextIndex)
+    addNextIndex(pipePath, nextIndex);
   }
 }
 
 function createInitialIndex() {
   let currentIndex = [_.random(0, dimension - 1), _.random(0, dimension - 1), _.random(0, dimension - 1)];
-  let isTaken = !!math.subset(placementMatrix, math.index(currentIndex[0], currentIndex[1], currentIndex[2]));
-  if (isTaken) {
+
+  // Start from a point that is unoccupied
+  if (isTaken(currentIndex)) {
     return createInitialIndex();
   } else {
     placementMatrix.subset(math.index(currentIndex[0], currentIndex[1], currentIndex[2]), 1);
@@ -79,8 +89,66 @@ function createInitialIndex() {
   }
 }
 
-let currentIndex = createInitialIndex();
-indexArray.push(currentIndex);
-addNextIndex(currentIndex);
+function createPipePath() {
+  let initialIndex = createInitialIndex();
+  let pipePath = [initialIndex];
+  addNextIndex(pipePath, initialIndex);
+  pipePathArray.push(pipePath);
+}
 
-console.log(indexArray);
+createPipePath();
+drawPath();
+
+function drawPath() {
+  let pipeWrapper = document.querySelector('a-entity#pipe-wrapper');
+  pipePathArray.forEach((pipePath) => {
+    pipePath.forEach((pipeSegment, index) => {
+      let sphere = getSphere(pipePath, index);
+      let drawnSegment = getPipeSegment(pipePath, index);
+      pipeWrapper.append(sphere);
+      pipeWrapper.append(drawnSegment);
+    });
+  })
+}
+
+function getSphere(pipePath, index) {
+  let startingPoint = pipePath[index];
+
+  let drawnSegment = document.createElement('a-sphere');
+  drawnSegment.setAttribute('color', 'red');
+  drawnSegment.setAttribute('opacity', `${index * 0.15}`);
+  drawnSegment.setAttribute('radius', 0.1);
+  drawnSegment.setAttribute('position', `${startingPoint[0]}, ${startingPoint[1]}, ${startingPoint[2]}`);
+
+  return drawnSegment;
+}
+
+function getPipeSegment(pipePath, index) {
+  if (index === pipePath.length - 1) {
+    return;
+  }
+
+  let startingPoint = pipePath[index];
+  let endingPoint = pipePath[index + 1];
+
+  let midX = (startingPoint[0] + endingPoint[0]) / 2;
+  let midY = (startingPoint[1] + endingPoint[1]) / 2;
+  let midZ = (startingPoint[2] + endingPoint[2]) / 2;
+
+  // TODO based on startingPoint and endingPoint, adjust the rotation value
+  let diffX = startingPoint[0] - endingPoint[0];
+  let diffY = startingPoint[1] - endingPoint[1];
+  let diffZ = startingPoint[2] - endingPoint[2];
+
+  let drawnSegment = document.createElement('a-cylinder');
+  drawnSegment.setAttribute('color', 'red');
+  drawnSegment.setAttribute('opacity', `${index * 0.15}`);
+  drawnSegment.setAttribute('radius', 0.01);
+  drawnSegment.setAttribute('height', 1);
+  drawnSegment.setAttribute('rotation', `${90 * diffX}, ${90 * diffX * -1}, ${90 * diffZ}`)
+  drawnSegment.setAttribute('position', `${midX}, ${midY}, ${midZ}`);
+
+  return drawnSegment;
+}
+
+console.log(pipePathArray);
