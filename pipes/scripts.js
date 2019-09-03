@@ -64,20 +64,20 @@ function getValidNextIndexArray(currentIndex) {
 function addNextIndex(pipePath, currentIndex) {
   // Avoid excessively long arrays
   if (pipePath.length >= maxPipeLength) {
-    return;
+    return pipePath;
   }
 
   // If no more pathways available, return
   let validNextIndexArray = getValidNextIndexArray(currentIndex);
   if (validNextIndexArray.length === 0) {
-    return;
+    return pipePath;
 
   // Else, add the next valid path and recurse
   } else {
     let nextIndex = validNextIndexArray[_.random(0, validNextIndexArray.length - 1)];
     pipePath.push(nextIndex);
     placementMatrix.subset(math.index(nextIndex[0], nextIndex[1], nextIndex[2]), 1);
-    addNextIndex(pipePath, nextIndex);
+    return addNextIndex(pipePath, nextIndex);
   }
 }
 
@@ -95,19 +95,41 @@ function createInitialIndex() {
 
 function createPipePath() {
   let initialIndex = createInitialIndex();
-  let pipePath = [initialIndex];
-  addNextIndex(pipePath, initialIndex);
+  let pipePath = addNextIndex([initialIndex], initialIndex);
   pipePathArray.push(pipePath);
 }
 
 function drawPath() {
-  pipePathArray.forEach((pipePath) => {
+  pipePathArray.forEach((pipePath, pipePathIndex) => {
     let color =  _.sample(['red', 'green', 'blue', 'yellow', 'pink']);
-    pipePath.forEach((pipeSegment, index) => {
-      drawSphere(pipePath, index, color);
-      drawCylinder(pipePath, index, color);
+    pipePath.forEach((pipeSegment, pipeSegmentIndex) => {
+      window.setTimeout(() => {
+        drawSphere(pipePath, pipeSegmentIndex, color);
+        drawCylinder(pipePath, pipeSegmentIndex, color);
+      }, getDrawDelay(pipePathArray, pipePathIndex, pipeSegmentIndex))
     });
   })
+}
+
+function getDrawDelay(pipePathArray, pipePathIndex, pipeSegmentIndex) {
+  // How much to delay the rendering of the entire pipe path by
+  let pipePathDelay = 0;
+
+  // How much to delay the rendering of each pipe segment by
+  let pipeSegmentRenderDelay = 100;
+
+  // If it's the first pipe path, start rendering immediately
+  // Else, start rendering only after the previous pipe path has rendered
+  if (pipePathIndex > 0) {
+    let previousPipePathLength = pipePathArray[pipePathIndex - 1].length;
+    pipePathDelay = previousPipePathLength * pipeSegmentRenderDelay;
+    console.log(pipePathDelay)
+  }
+
+  // Only render a segment if the previous segment has rendered
+  let pipeSegmentDelay = pipeSegmentRenderDelay * pipeSegmentIndex;
+
+  return pipePathDelay + pipeSegmentDelay;
 }
 
 function drawSphere(pipePath, index, color) {
