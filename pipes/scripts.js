@@ -101,37 +101,25 @@ function createPipePath() {
 }
 
 function drawPath() {
-  let pipeWrapper = document.querySelector('a-entity#pipe-wrapper');
-
   pipePathArray.forEach((pipePath) => {
-    let pipeColor =  _.sample(['red', 'green', 'blue', 'yellow', 'pink']);
+    let color =  _.sample(['red', 'green', 'blue', 'yellow', 'pink']);
     pipePath.forEach((pipeSegment, index) => {
-      let sphere = getSphere(pipePath, index);
-      sphere.setAttribute('color', pipeColor);
-      pipeWrapper.append(sphere);
-
-      if (index < pipePath.length - 1) {
-        let drawnSegment = getPipeSegment(pipePath, index);
-        drawnSegment.setAttribute('color', pipeColor);
-        pipeWrapper.append(drawnSegment);
-      }
+      drawSphere(pipePath, index, color);
+      drawCylinder(pipePath, index, color);
     });
   })
 }
 
-function getSphere(pipePath, index) {
+function drawSphere(pipePath, index, color) {
   let startingPoint = pipePath[index];
+  let position = `${startingPoint[0]}, ${startingPoint[1]}, ${startingPoint[2]}`
 
-  let drawnSphereData = {
-    position: `${startingPoint[0]}, ${startingPoint[1]}, ${startingPoint[2]}`,
-    radius: getSphereRadius(pipePath, index)
-  };
-
-  let drawnSphere = document.createElement('a-sphere');
-  drawnSphere.setAttribute('radius', drawnSphereData.radius);
-  drawnSphere.setAttribute('position', drawnSphereData.position);
-
-  return drawnSphere;
+  let pipeWrapper = document.querySelector('a-entity#pipe-wrapper');
+  let sphere = document.createElement('a-sphere');
+  sphere.setAttribute('position', position);
+  sphere.setAttribute('radius', getSphereRadius(pipePath, index));
+  sphere.setAttribute('color', color);
+  pipeWrapper.append(sphere);
 }
 
 function getSphereRadius(pipePath, index) {
@@ -152,7 +140,7 @@ function getSphereRadius(pipePath, index) {
   let probability = 0.5;
 
   // Check if cylinder is going in the same direction as the previous cylinder
-  // If they're going in different directions, make the radius of the sphere slightly bigger sometimes
+  // If they're going in different directions, sometimes make the radius of the sphere slightly bigger
   if (comparison.every(point => point === 0)) {
     return pipeRadius;
   } else if (Math.random() > probability) {
@@ -162,32 +150,33 @@ function getSphereRadius(pipePath, index) {
   }
 }
 
-function getPipeSegment(pipePath, index) {
+function drawCylinder(pipePath, index, color) {
+  if (index === pipePath.length - 1) {
+    return;
+  }
+
   let startingPoint = pipePath[index];
   let endingPoint = pipePath[index + 1];
+  
+  // Place the cylinder in between the starting and ending points
+  let midPoint = math.divide(math.add(startingPoint, endingPoint), 2);
+  let position = `${midPoint[0]}, ${midPoint[1]}, ${midPoint[2]},`
 
-  let midX = (startingPoint[0] + endingPoint[0]) / 2;
-  let midY = (startingPoint[1] + endingPoint[1]) / 2;
-  let midZ = (startingPoint[2] + endingPoint[2]) / 2;
-
+  // Rotate the cylinder to connect the two points together
   let rotationX = (endingPoint[0] - startingPoint[0]) * 90;
   let rotationY = (1 - endingPoint[1] - startingPoint[1]) * 90;
   let rotationZ = (endingPoint[2] - startingPoint[2]) * 90;
-  let showSphere = false;
+  let rotation =`${rotationX}, ${rotationY}, ${rotationZ}`;
 
-  let drawnSegmentData = {
-    rotation: `${rotationX}, ${rotationY}, ${rotationZ}`,
-    position: `${midX}, ${midY}, ${midZ}`,
-    showSphere: showSphere,
-  };
-
-  let drawnSegment = document.createElement('a-cylinder');
-  drawnSegment.setAttribute('radius', pipeRadius);
-  drawnSegment.setAttribute('height', pipeHeight);
-  drawnSegment.setAttribute('rotation', drawnSegmentData.rotation);
-  drawnSegment.setAttribute('position', drawnSegmentData.position);
-
-  return drawnSegment;
+  // Render the cylinder
+  let pipeWrapper = document.querySelector('a-entity#pipe-wrapper');
+  let cylinder = document.createElement('a-cylinder');
+  cylinder.setAttribute('radius', pipeRadius);
+  cylinder.setAttribute('height', pipeHeight);
+  cylinder.setAttribute('rotation', rotation);
+  cylinder.setAttribute('position', position);
+  cylinder.setAttribute('color', color);
+  pipeWrapper.append(cylinder);
 }
 
 createPipePath();
@@ -198,22 +187,9 @@ createPipePath();
 createPipePath();
 drawPath();
 
-// Data structure
-// let pipePathArray = [pipePath1, pipePath2, etc...]
-// let pipePath1 = [pipeSegment1, pipeSegment2, etc...]
-// let pipeSegment = {
-//    startingPoint: String,
-//    endingPoint: String,
-//    position: String,
-//    rotation: String,
-//    color: String,
-//    sphereRadius: Number, // whether sphere should be big or small
-// }
-
 // Data pipeline
 // 1. Generate space
 // 2. Generate plot for a pipePath, ensuring no collisions between other pipe segments
 // 3. Generate some number of pipePaths
 // 4. Based on pipePaths, generate the drawable segments
-//
 
