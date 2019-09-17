@@ -13,9 +13,12 @@
 // Global variables
 const dimension = 10;
 const maxPipeLength = 50;
+const minPipeCount = 5;
+const maxPipeCount = 20;
 const pipeRadius = 0.1;
 const pipeHeight = 1;
 const bigSphereRadius = 0.175;
+const pipeDrawDelay = 100;
 
 // Log of all the spots that are already taken up by a pipe
 let placementMatrix = math.zeros(dimension, dimension, dimension);
@@ -99,37 +102,24 @@ function createPipePath() {
   pipePathArray.push(pipePath);
 }
 
-function drawPath() {
-  pipePathArray.forEach((pipePath, pipePathIndex) => {
-    let color =  _.sample(['red', 'green', 'blue', 'yellow', 'pink']);
-    pipePath.forEach((pipeSegment, pipeSegmentIndex) => {
-      window.setTimeout(() => {
-        drawSphere(pipePath, pipeSegmentIndex, color);
-        drawCylinder(pipePath, pipeSegmentIndex, color);
-      }, getDrawDelay(pipePathArray, pipePathIndex, pipeSegmentIndex))
-    });
-  })
-}
-
-function getDrawDelay(pipePathArray, pipePathIndex, pipeSegmentIndex) {
-  // How much to delay the rendering of the entire pipe path by
-  let pipePathDelay = 0;
-
-  // How much to delay the rendering of each pipe segment by
-  let pipeSegmentRenderDelay = 100;
-
-  // If it's the first pipe path, start rendering immediately
-  // Else, start rendering only after the previous pipe path has rendered
-  if (pipePathIndex > 0) {
-    let previousPipePathLength = pipePathArray[pipePathIndex - 1].length;
-    pipePathDelay = previousPipePathLength * pipeSegmentRenderDelay;
-    console.log(pipePathDelay)
+async function drawPipe(pipePath) {
+  let color =  _.sample(['red', 'green', 'blue', 'yellow', 'pink']);
+  for (let index = 0; index < pipePath.length - 1; index++) {
+    await drawSegment(pipePath, index, color);
   }
 
-  // Only render a segment if the previous segment has rendered
-  let pipeSegmentDelay = pipeSegmentRenderDelay * pipeSegmentIndex;
+  return new Promise(resolve => {
+    setTimeout(resolve, pipeDrawDelay);
+  });
+}
 
-  return pipePathDelay + pipeSegmentDelay;
+async function drawSegment(pipePath, index, color) {
+  drawSphere(pipePath, index, color);
+  drawCylinder(pipePath, index, color);
+
+  return new Promise(resolve => {
+    setTimeout(resolve, pipeDrawDelay);
+  });
 }
 
 function drawSphere(pipePath, index, color) {
@@ -201,13 +191,19 @@ function drawCylinder(pipePath, index, color) {
   pipeWrapper.append(cylinder);
 }
 
-createPipePath();
-createPipePath();
-createPipePath();
-createPipePath();
-createPipePath();
-createPipePath();
-drawPath();
+async function main() {
+  let numberOfPipes = _.random(minPipeCount, maxPipeCount);
+  
+  for (let i = 0; i < numberOfPipes - 1; i++) {
+    createPipePath();
+  }
+
+  for (const pipePath of pipePathArray) {
+    await drawPipe(pipePath);
+  }
+}
+
+main();
 
 // Data pipeline
 // 1. Generate space
