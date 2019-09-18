@@ -11,14 +11,14 @@
 */
 
 // Global variables
-const dimension = 10;
-const maxPipeLength = 50;
-const minPipeCount = 5;
-const maxPipeCount = 20;
+const dimension = 16;
+const maxPipeLength = 10;
+const minPipeCount = 1;
+const maxPipeCount = 2;
 const pipeRadius = 0.1;
 const pipeHeight = 1;
-const bigSphereRadius = 0.175;
-const pipeDrawDelay = 100;
+const bigSphereRadius = 0.15;
+const pipeDrawDelay = 50;
 
 // Log of all the spots that are already taken up by a pipe
 let placementMatrix = math.zeros(dimension, dimension, dimension);
@@ -103,7 +103,11 @@ function createPipePath() {
 }
 
 async function drawPipe(pipePath) {
-  let color =  _.sample(['red', 'green', 'blue', 'yellow', 'pink']);
+  let h = _.random(0, 255);
+  let s = _.random(0, 50);
+  let l = _.random(30, 70);
+
+  let color =  `hsl(${h}, ${s}%, ${l}%)`;
   for (let index = 0; index < pipePath.length - 1; index++) {
     await drawSegment(pipePath, index, color);
   }
@@ -191,6 +195,53 @@ function drawCylinder(pipePath, index, color) {
   pipeWrapper.append(cylinder);
 }
 
+async function fadeOut() {
+  let fadeOutArray = [];
+  for (let x = -5; x < 5; x++) {
+    for (let y = -5; y < 5; y++) {
+      fadeOutArray.push([x, y]);
+    }
+  }
+  fadeOutArray = _.shuffle(fadeOutArray);
+
+  let numberToDrawAtOnce = 10;
+  let increment = fadeOutArray.length / numberToDrawAtOnce;
+
+  for (let i = 0; i < increment - 1; i++) {
+    let coordsArray = []
+    for (let j = 0; j < numberToDrawAtOnce; j++) {
+      coordsArray.push(fadeOutArray[(i * increment) + j]);
+    }
+    await drawBoxArray(coordsArray);
+  }
+}
+
+async function drawBoxArray(coordsArray) {
+  console.log(coordsArray);
+  for (const coords of coordsArray) {
+    drawBox(coords[0], coords[1]);
+  }
+
+  return new Promise(resolve => {
+    setTimeout(resolve, 1000);
+  });
+}
+
+function drawBox(x, y) {
+  let fadeOutWrapper = document.querySelector('a-entity#fade-out-wrapper');
+  let box = document.createElement('a-box');
+
+  let height = 0.02;
+  let depth = 0.001
+
+  box.setAttribute('height', height);
+  box.setAttribute('width', height);
+  box.setAttribute('depth', depth);
+  box.setAttribute('position', `${x * height}, ${y * height}, 0`);
+  box.setAttribute('color', 'grey');
+  fadeOutWrapper.append(box);
+}
+
 async function main() {
   let numberOfPipes = _.random(minPipeCount, maxPipeCount);
   
@@ -201,13 +252,8 @@ async function main() {
   for (const pipePath of pipePathArray) {
     await drawPipe(pipePath);
   }
+
+  fadeOut();
 }
 
 main();
-
-// Data pipeline
-// 1. Generate space
-// 2. Generate plot for a pipePath, ensuring no collisions between other pipe segments
-// 3. Generate some number of pipePaths
-// 4. Based on pipePaths, generate the drawable segments
-
