@@ -11,14 +11,14 @@
 */
 
 // Global variables
-const dimension = 10;
+const dimension = 16;
 const maxPipeLength = 50;
 const minPipeCount = 5;
 const maxPipeCount = 20;
 const pipeRadius = 0.1;
 const pipeHeight = 1;
-const bigSphereRadius = 0.175;
-const pipeDrawDelay = 100;
+const bigSphereRadius = 0.15;
+const pipeDrawDelay = 50;
 
 // Log of all the spots that are already taken up by a pipe
 let placementMatrix = math.zeros(dimension, dimension, dimension);
@@ -103,35 +103,44 @@ function createPipePath() {
 }
 
 async function drawPipe(pipePath) {
-  let color =  _.sample(['red', 'green', 'blue', 'yellow', 'pink']);
+  let h = _.random(0, 255);
+  let s = _.random(0, 50);
+  let l = _.random(30, 70);
+
+  let color =  `hsl(${h}, ${s}%, ${l}%)`;
+  let globalWrapper = document.querySelector('a-entity#pipe-wrapper');
+  let instanceWrapper = document.createElement('a-entity');
+  globalWrapper.append(instanceWrapper);
+
   for (let index = 0; index < pipePath.length - 1; index++) {
-    await drawSegment(pipePath, index, color);
+    await drawSegment(pipePath, index, color, instanceWrapper);
   }
 
-  return new Promise(resolve => {
-    setTimeout(resolve, pipeDrawDelay);
-  });
-}
-
-async function drawSegment(pipePath, index, color) {
-  drawSphere(pipePath, index, color);
-  drawCylinder(pipePath, index, color);
+  // instanceWrapper.setAttribute('geometry-merger', 'preserveOriginal: false');
 
   return new Promise(resolve => {
     setTimeout(resolve, pipeDrawDelay);
   });
 }
 
-function drawSphere(pipePath, index, color) {
+async function drawSegment(pipePath, index, color, wrapper) {
+  drawSphere(pipePath, index, color, wrapper);
+  drawCylinder(pipePath, index, color, wrapper);
+
+  return new Promise(resolve => {
+    setTimeout(resolve, pipeDrawDelay);
+  });
+}
+
+function drawSphere(pipePath, index, color, wrapper) {
   let startingPoint = pipePath[index];
   let position = `${startingPoint[0]}, ${startingPoint[1]}, ${startingPoint[2]}`
 
-  let pipeWrapper = document.querySelector('a-entity#pipe-wrapper');
   let sphere = document.createElement('a-sphere');
   sphere.setAttribute('position', position);
   sphere.setAttribute('radius', getSphereRadius(pipePath, index));
   sphere.setAttribute('color', color);
-  pipeWrapper.append(sphere);
+  wrapper.append(sphere);
 }
 
 function getSphereRadius(pipePath, index) {
@@ -162,7 +171,7 @@ function getSphereRadius(pipePath, index) {
   }
 }
 
-function drawCylinder(pipePath, index, color) {
+function drawCylinder(pipePath, index, color, wrapper) {
   if (index === pipePath.length - 1) {
     return;
   }
@@ -181,14 +190,75 @@ function drawCylinder(pipePath, index, color) {
   let rotation =`${rotationX}, ${rotationY}, ${rotationZ}`;
 
   // Render the cylinder
-  let pipeWrapper = document.querySelector('a-entity#pipe-wrapper');
   let cylinder = document.createElement('a-cylinder');
   cylinder.setAttribute('radius', pipeRadius);
   cylinder.setAttribute('height', pipeHeight);
   cylinder.setAttribute('rotation', rotation);
   cylinder.setAttribute('position', position);
   cylinder.setAttribute('color', color);
-  pipeWrapper.append(cylinder);
+  wrapper.append(cylinder);
+}
+
+async function fadeOut() {
+  let fadeOutArray = [];
+  let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
+  var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+  svgWrapper.setAttribute('width', width);
+  svgWrapper.setAttribute('height', height);
+
+  for (let x = 0; x < Math.floor(width / 10); x++) {
+    for (let y = 0; y < Math.floor(height / 10); y++) {
+      fadeOutArray.push([x, y]);
+    }
+  }
+  fadeOutArray = _.shuffle(fadeOutArray);
+
+  let numberofSquaresPerWave = 400;
+  let numberOfWaves = Math.floor(fadeOutArray.length / numberofSquaresPerWave);
+
+  for (let i = 0; i < numberOfWaves; i++) {
+    let indexStart = numberofSquaresPerWave * i;
+    let indexEnd = indexStart + numberofSquaresPerWave;
+
+    if (indexEnd > fadeOutArray.length) {
+      indexEnd = fadeOutArray.length;
+    }
+
+    let coordsArray = fadeOutArray.slice(indexStart, indexEnd);
+    await drawSquareArray(coordsArray);
+  }
+}
+
+async function drawSquareArray(coordsArray) {
+  for (const coords of coordsArray) {
+    drawSquare(coords[0], coords[1]);
+  }
+
+  return new Promise(resolve => {
+    setTimeout(resolve, 0);
+  });
+}
+
+function drawSquare(x, y) {
+  let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
+  let square = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  let height = 10;
+  square.setAttribute('width', height);
+  square.setAttribute('height', height);
+  square.setAttribute('x', x * height);
+  square.setAttribute('y', y * height);
+  square.setAttribute('fill', 'black');
+  svgWrapper.append(square);
+}
+
+async function cleanUp() {
+  let pipeWrapper = document.querySelector('a-entity#pipe-wrapper');
+  let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
+  
+  pipeWrapper.innerHTML = '';
+  svgWrapper.innerHTML = '';
 }
 
 async function main() {
@@ -201,13 +271,10 @@ async function main() {
   for (const pipePath of pipePathArray) {
     await drawPipe(pipePath);
   }
+
+  await fadeOut();
+  await cleanUp();
+  main()
 }
 
 main();
-
-// Data pipeline
-// 1. Generate space
-// 2. Generate plot for a pipePath, ensuring no collisions between other pipe segments
-// 3. Generate some number of pipePaths
-// 4. Based on pipePaths, generate the drawable segments
-
