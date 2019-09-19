@@ -17,6 +17,8 @@ body
   .fade-out-wrapper( style='width: 100vw; height: 100vh; position: absolute; z-index: 1; pointer-events: none;' )
     svg( id='fade-out-wrapper-svg' width='1000' height='1000')
   a-scene( background='color: #000' stats)
+    a-entity( light="type: ambient; color: #BBB" )
+    a-entity( light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1" )
     a-entity( id='pipe-wrapper' position='-8 -2 -20' )
     a-camera( wasd-controls='acceleration: 200' )
   script( src='scripts.js' )

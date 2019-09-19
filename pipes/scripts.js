@@ -12,9 +12,9 @@
 
 // Global variables
 const dimension = 16;
-const maxPipeLength = 50;
+const maxPipeLength = 75;
 const minPipeCount = 5;
-const maxPipeCount = 20;
+const maxPipeCount = 15;
 const pipeRadius = 0.1;
 const pipeHeight = 1;
 const bigSphereRadius = 0.15;
@@ -70,6 +70,11 @@ function addNextIndex(pipePath, currentIndex) {
     return pipePath;
   }
 
+  // Add some randomness to length
+  if (_.random(100) < 2) {
+    return pipePath;
+  }
+
   // If no more pathways available, return
   let validNextIndexArray = getValidNextIndexArray(currentIndex);
   if (validNextIndexArray.length === 0) {
@@ -115,8 +120,6 @@ async function drawPipe(pipePath) {
   for (let index = 0; index < pipePath.length - 1; index++) {
     await drawSegment(pipePath, index, color, instanceWrapper);
   }
-
-  // instanceWrapper.setAttribute('geometry-merger', 'preserveOriginal: false');
 
   return new Promise(resolve => {
     setTimeout(resolve, pipeDrawDelay);
@@ -208,8 +211,8 @@ async function fadeOut() {
   svgWrapper.setAttribute('width', width);
   svgWrapper.setAttribute('height', height);
 
-  for (let x = 0; x < Math.floor(width / 10); x++) {
-    for (let y = 0; y < Math.floor(height / 10); y++) {
+  for (let x = 0; x < Math.ceil(width / 10); x++) {
+    for (let y = 0; y < Math.ceil(height / 10); y++) {
       fadeOutArray.push([x, y]);
     }
   }
@@ -259,6 +262,8 @@ async function cleanUp() {
   
   pipeWrapper.innerHTML = '';
   svgWrapper.innerHTML = '';
+  pipePathArray = [];
+  placementMatrix = math.zeros(dimension, dimension, dimension);
 }
 
 async function main() {
