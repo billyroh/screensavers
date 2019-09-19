@@ -12,9 +12,9 @@
 
 // Global variables
 const dimension = 16;
-const maxPipeLength = 5;
+const maxPipeLength = 50;
 const minPipeCount = 5;
-const maxPipeCount = 6;
+const maxPipeCount = 20;
 const pipeRadius = 0.1;
 const pipeHeight = 1;
 const bigSphereRadius = 0.15;
@@ -108,34 +108,39 @@ async function drawPipe(pipePath) {
   let l = _.random(30, 70);
 
   let color =  `hsl(${h}, ${s}%, ${l}%)`;
+  let globalWrapper = document.querySelector('a-entity#pipe-wrapper');
+  let instanceWrapper = document.createElement('a-entity');
+  globalWrapper.append(instanceWrapper);
+
   for (let index = 0; index < pipePath.length - 1; index++) {
-    await drawSegment(pipePath, index, color);
+    await drawSegment(pipePath, index, color, instanceWrapper);
   }
 
-  return new Promise(resolve => {
-    setTimeout(resolve, pipeDrawDelay);
-  });
-}
-
-async function drawSegment(pipePath, index, color) {
-  drawSphere(pipePath, index, color);
-  drawCylinder(pipePath, index, color);
+  // instanceWrapper.setAttribute('geometry-merger', 'preserveOriginal: false');
 
   return new Promise(resolve => {
     setTimeout(resolve, pipeDrawDelay);
   });
 }
 
-function drawSphere(pipePath, index, color) {
+async function drawSegment(pipePath, index, color, wrapper) {
+  drawSphere(pipePath, index, color, wrapper);
+  drawCylinder(pipePath, index, color, wrapper);
+
+  return new Promise(resolve => {
+    setTimeout(resolve, pipeDrawDelay);
+  });
+}
+
+function drawSphere(pipePath, index, color, wrapper) {
   let startingPoint = pipePath[index];
   let position = `${startingPoint[0]}, ${startingPoint[1]}, ${startingPoint[2]}`
 
-  let pipeWrapper = document.querySelector('a-entity#pipe-wrapper');
   let sphere = document.createElement('a-sphere');
   sphere.setAttribute('position', position);
   sphere.setAttribute('radius', getSphereRadius(pipePath, index));
   sphere.setAttribute('color', color);
-  pipeWrapper.append(sphere);
+  wrapper.append(sphere);
 }
 
 function getSphereRadius(pipePath, index) {
@@ -166,7 +171,7 @@ function getSphereRadius(pipePath, index) {
   }
 }
 
-function drawCylinder(pipePath, index, color) {
+function drawCylinder(pipePath, index, color, wrapper) {
   if (index === pipePath.length - 1) {
     return;
   }
@@ -185,74 +190,75 @@ function drawCylinder(pipePath, index, color) {
   let rotation =`${rotationX}, ${rotationY}, ${rotationZ}`;
 
   // Render the cylinder
-  let pipeWrapper = document.querySelector('a-entity#pipe-wrapper');
   let cylinder = document.createElement('a-cylinder');
   cylinder.setAttribute('radius', pipeRadius);
   cylinder.setAttribute('height', pipeHeight);
   cylinder.setAttribute('rotation', rotation);
   cylinder.setAttribute('position', position);
   cylinder.setAttribute('color', color);
-  pipeWrapper.append(cylinder);
+  wrapper.append(cylinder);
 }
 
 async function fadeOut() {
   let fadeOutArray = [];
-  for (let x = -16 * 3; x < 16 * 3; x++) {
-    for (let y = -9 * 3; y < 9 * 3; y++) {
+  let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
+  var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+  svgWrapper.setAttribute('width', width);
+  svgWrapper.setAttribute('height', height);
+
+  for (let x = 0; x < Math.floor(width / 10); x++) {
+    for (let y = 0; y < Math.floor(height / 10); y++) {
       fadeOutArray.push([x, y]);
     }
   }
   fadeOutArray = _.shuffle(fadeOutArray);
 
-  let numberToDrawPerChunk = 100;
-  let numberOfChunks = Math.floor(fadeOutArray.length / numberToDrawPerChunk);
+  let numberofSquaresPerWave = 400;
+  let numberOfWaves = Math.floor(fadeOutArray.length / numberofSquaresPerWave);
 
-  for (let i = 0; i < numberOfChunks; i++) {
-    let indexStart = numberToDrawPerChunk * i;
-    let indexEnd = indexStart + numberToDrawPerChunk;
+  for (let i = 0; i < numberOfWaves; i++) {
+    let indexStart = numberofSquaresPerWave * i;
+    let indexEnd = indexStart + numberofSquaresPerWave;
+
     if (indexEnd > fadeOutArray.length) {
       indexEnd = fadeOutArray.length;
     }
 
     let coordsArray = fadeOutArray.slice(indexStart, indexEnd);
-    await drawBoxArray(coordsArray);
+    await drawSquareArray(coordsArray);
   }
 }
 
-async function drawBoxArray(coordsArray) {
-  let wrapper = document.querySelector('a-entity#fade-out-wrapper');
-  let container = document.createElement('a-entity');
-  wrapper.append(container);
-
+async function drawSquareArray(coordsArray) {
   for (const coords of coordsArray) {
-    drawBox(coords[0], coords[1], container);
+    drawSquare(coords[0], coords[1]);
   }
-  
-  container.setAttribute('geometry-merger', 'preserveOriginal: false');
 
   return new Promise(resolve => {
     setTimeout(resolve, 0);
   });
 }
 
-function drawBox(x, y, container) {
-  let box = document.createElement('a-plane');
-
-  let height = 0.02;
-
-  box.setAttribute('height', height);
-  box.setAttribute('width', height);
-  box.setAttribute('position', `${x * height}, ${y * height}, 0`);
-  box.setAttribute('color', 'grey');
-  container.append(box);
+function drawSquare(x, y) {
+  let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
+  let square = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  let height = 10;
+  square.setAttribute('width', height);
+  square.setAttribute('height', height);
+  square.setAttribute('x', x * height);
+  square.setAttribute('y', y * height);
+  square.setAttribute('fill', 'black');
+  svgWrapper.append(square);
 }
 
 async function cleanUp() {
-  let fadeOutWrapper = document.querySelector('a-entity#fade-out-wrapper');
   let pipeWrapper = document.querySelector('a-entity#pipe-wrapper');
+  let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
   
-  fadeOutWrapper.innerHTML = '';
   pipeWrapper.innerHTML = '';
+  svgWrapper.innerHTML = '';
 }
 
 async function main() {

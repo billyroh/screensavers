@@ -14,8 +14,9 @@ head
   script( src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js' )
   script( src='https://unpkg.com/aframe-geometry-merger-component/dist/aframe-geometry-merger-component.min.js' )
 body
+  .fade-out-wrapper( style='width: 100vw; height: 100vh; position: absolute; z-index: 1; pointer-events: none;' )
+    svg( id='fade-out-wrapper-svg' width='1000' height='1000')
   a-scene( background='color: #000' stats)
     a-entity( id='pipe-wrapper' position='-8 -2 -20' )
     a-camera( wasd-controls='acceleration: 200' )
-      a-entity( id='fade-out-wrapper' position='0 0 -0.5' )
   script( src='scripts.js' )
