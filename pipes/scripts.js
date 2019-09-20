@@ -10,11 +10,11 @@
 
 */
 
-// Global variables
+// Global consts
 const dimension = 16;
 const maxPipeLength = 75;
 const minPipeCount = 5;
-const maxPipeCount = 15;
+const maxPipeCount = 20;
 const pipeRadius = 0.1;
 const pipeHeight = 1;
 const bigSphereRadius = 0.15;
@@ -25,6 +25,9 @@ let placementMatrix = math.zeros(dimension, dimension, dimension);
 
 // Array that is an array of the path of a single pipe
 let pipePathArray = [];
+
+// Ensures only one teapot has been rendered at a time
+let teaPotHasBeenRendered = false;
 
 // Roll dice to determine direction
 // possible permutations:
@@ -119,6 +122,7 @@ async function drawPipe(pipePath) {
 
   for (let index = 0; index < pipePath.length - 1; index++) {
     await drawSegment(pipePath, index, color, instanceWrapper);
+    maybeDrawTeapot(pipePath, index, color, instanceWrapper);
   }
 
   return new Promise(resolve => {
@@ -202,6 +206,23 @@ function drawCylinder(pipePath, index, color, wrapper) {
   wrapper.append(cylinder);
 }
 
+function maybeDrawTeapot(pipePath, index, color, wrapper) {
+  if (teaPotHasBeenRendered) {
+    return;
+  }
+
+  if (_.random(1000) < 1) {
+    let teapot = document.createElement('a-obj-model');
+    let position = `${pipePath[index][0]}, ${pipePath[index][1]}, ${pipePath[index][2]}`
+    teapot.setAttribute('src', '#teapot');
+    teapot.setAttribute('scale', '0.005 0.005 0.005');
+    teapot.setAttribute('color', color);
+    teapot.setAttribute('position', position);
+    wrapper.append(teapot);
+    teaPotHasBeenRendered = true;
+  }
+}
+
 async function fadeOut() {
   let fadeOutArray = [];
   let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
@@ -218,7 +239,7 @@ async function fadeOut() {
   }
   fadeOutArray = _.shuffle(fadeOutArray);
 
-  let numberofSquaresPerWave = 400;
+  let numberofSquaresPerWave = 300;
   let numberOfWaves = Math.floor(fadeOutArray.length / numberofSquaresPerWave);
 
   for (let i = 0; i < numberOfWaves; i++) {
@@ -235,25 +256,27 @@ async function fadeOut() {
 }
 
 async function drawSquareArray(coordsArray) {
+  let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
+  let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  let height = 10;
+  let pathString = '';
+
   for (const coords of coordsArray) {
-    drawSquare(coords[0], coords[1]);
+    // drawSquare(coords[0], coords[1]);
+    let vertex1 = `M ${coords[0] * height} ${coords[1] * height}`;
+    let vertex2 = `H ${(coords[0] * height) + height}`;
+    let vertex3 = `V ${(coords[1] * height) + height}`;
+    let vertex4 = `H ${coords[0] * height}`;
+    pathString += `${vertex1} ${vertex2} ${vertex3} ${vertex4} Z `;
   }
+  
+  path.setAttribute('d', pathString);
+  path.setAttribute('fill', 'black');
+  svgWrapper.append(path);
 
   return new Promise(resolve => {
-    setTimeout(resolve, 0);
+    setTimeout(resolve, 10);
   });
-}
-
-function drawSquare(x, y) {
-  let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
-  let square = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  let height = 10;
-  square.setAttribute('width', height);
-  square.setAttribute('height', height);
-  square.setAttribute('x', x * height);
-  square.setAttribute('y', y * height);
-  square.setAttribute('fill', 'black');
-  svgWrapper.append(square);
 }
 
 async function cleanUp() {
@@ -264,6 +287,7 @@ async function cleanUp() {
   svgWrapper.innerHTML = '';
   pipePathArray = [];
   placementMatrix = math.zeros(dimension, dimension, dimension);
+  teaPotHasBeenRendered = false;
 }
 
 async function main() {
