@@ -23,8 +23,9 @@ module.exports = function(grunt) {
           }
         },
         files: {
+          'index.html': 'src/index.pug',
           'pipes/index.html': 'src/pipes.pug',
-          'index.html': 'src/index.pug'
+          'maze/index.html': 'src/maze.pug',
         }
       }
     },
@@ -40,7 +41,7 @@ module.exports = function(grunt) {
         livereload: true
       },
       scripts: {
-        files: ['src/*', 'pipes/scripts.js'],
+        files: ['src/*', 'pipes/scripts.js', 'maze/scripts.js'],
         tasks: ['updateDom']
       },
     }

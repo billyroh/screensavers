@@ -1,14 +1,9 @@
-/*
-# General psuedocode 
-- Roll dice to determine direction. Bias slightly toward maintaining previous direction.
-- If the space is already taken up, roll again.
-- Roll dice to determine whether to have bulb or not.
-- Generate segment. Record segment's placement in array.
-
-# Data structures...
-- matrix?
-
-*/
+// Overall structure
+// - Create a matrix of all the possible coordinates in the space
+// - Draw a plot of each plot, ensuring the pipes don't overlap
+// - Based on the plot, render each pipe
+// - Sometimes show a teapot, but only one max
+// - Once all pipes are rendered, fade out then restart the sequence
 
 // Global consts
 const dimension = 16;
@@ -243,7 +238,8 @@ async function fadeOut() {
   }
   fadeOutArray = _.shuffle(fadeOutArray);
 
-  let numberofSquaresPerWave = 300;
+  // Make the fade out effect proportional to the viewport's width
+  let numberofSquaresPerWave = Math.floor(width / 3);
   let numberOfWaves = Math.floor(fadeOutArray.length / numberofSquaresPerWave);
 
   for (let i = 0; i < numberOfWaves; i++) {

@@ -63,3 +63,4 @@ typings/
 # Misc
 .sass-cache
 style.css.map
+.DS_Store
