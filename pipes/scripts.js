@@ -7,13 +7,14 @@
 
 // Global consts
 const dimension = 16;
-const maxPipeLength = 75;
+const maxPipeLength = 100;
 const minPipeCount = 5;
 const maxPipeCount = 20;
 const pipeRadius = 0.1;
-const pipeHeight = 1;
+const pipeHeight = 1.01;
 const bigSphereRadius = 0.15;
 const pipeDrawDelay = 50;
+const metalness = 0.3;
 
 // Log of all the spots that are already taken up by a pipe
 let placementMatrix = math.zeros(dimension, dimension, dimension);
@@ -108,7 +109,7 @@ function createPipePath() {
 async function drawPipe(pipePath) {
   let h = _.random(0, 255);
   let s = _.random(0, 50);
-  let l = _.random(30, 70);
+  let l = _.random(20, 60);
 
   let color =  `hsl(${h}, ${s}%, ${l}%)`;
   let globalWrapper = document.querySelector('a-entity#pipe-wrapper');
@@ -142,6 +143,7 @@ function drawSphere(pipePath, index, color, wrapper) {
   sphere.setAttribute('position', position);
   sphere.setAttribute('radius', getSphereRadius(pipePath, index));
   sphere.setAttribute('color', color);
+  sphere.setAttribute('material', `metalness: ${metalness}`);
   wrapper.append(sphere);
 
   if (index === pipePath.length - 2) {
@@ -202,6 +204,7 @@ function drawCylinder(pipePath, index, color, wrapper) {
   cylinder.setAttribute('rotation', rotation);
   cylinder.setAttribute('position', position);
   cylinder.setAttribute('color', color);
+  cylinder.setAttribute('material', `metalness: ${metalness}`);
   wrapper.append(cylinder);
 }
 
@@ -217,6 +220,7 @@ function maybeDrawTeapot(pipePath, index, color, wrapper) {
     teapot.setAttribute('scale', '0.005 0.005 0.005');
     teapot.setAttribute('color', color);
     teapot.setAttribute('position', position);
+    teapot.setAttribute('material', `metalness: ${metalness}`);
     wrapper.append(teapot);
     teaPotHasBeenRendered = true;
   }

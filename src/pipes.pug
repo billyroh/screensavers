@@ -19,6 +19,8 @@ body
   a-scene( background='color: black' )
     a-assets
       a-asset-item( id='teapot' src='./teapot.obj' )
+    a-entity( light="type: ambient; color: #FFF" )
+    a-entity( light="type: directional; color: #FFF; intensity: 1" position="-0.5 1 1" )
     a-entity( id='pipe-wrapper' position='-8 -2 -20' )
     a-camera( wasd-controls='acceleration: 200' )
   script( src='scripts.js' )
