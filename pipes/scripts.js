@@ -148,6 +148,10 @@ function drawSphere(pipePath, index, color, wrapper) {
   sphere.setAttribute('radius', getSphereRadius(pipePath, index));
   sphere.setAttribute('color', color);
   wrapper.append(sphere);
+
+  if (index === pipePath.length - 2) {
+    drawSphere(pipePath, index + 1, color, wrapper);
+  }
 }
 
 function getSphereRadius(pipePath, index) {
