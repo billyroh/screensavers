@@ -70,7 +70,8 @@ function addNextIndex(pipePath, currentIndex) {
   }
 
   // Add some randomness to length
-  if (_.random(100) < 2) {
+  // Avoid excessively short arrays
+  if (_.random(100) < 2 && pipePath.length > 5) {
     return pipePath;
   }
 
