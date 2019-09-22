@@ -63,3 +63,76 @@ function displayMaze(m) {
 	}
 	return text.join('');
 }
+
+function renderMaze(m) {
+	var text= [];
+	let globalWrapper = document.querySelector('a-entity#plane-wrapper');
+	let horizontalPlanes = [];
+	for (var j= 0; j<m.x*2+1; j++) {
+		var line= [];
+		if (0 == j%2) {
+			let row = [];
+			for (var k=0; k<m.y*4+1; k++) {
+				if (0 == k%4) {
+					line[k]= '+';
+					let box = document.createElement('a-box');
+					box.setAttribute('width', 0.5);
+					box.setAttribute('height', 0.5);
+					box.setAttribute('depth', 0.5);
+					box.setAttribute('position', `${k} 0 ${j}`);
+					globalWrapper.append(box);
+				}
+				else {
+					if (j>0 && m.verti[j/2-1][Math.floor(k/4)]) {
+						line[k]= ' ';
+					}
+					else {
+						// Use j as the z-axis value
+						// Use k as the x-axis value
+						line[k]= '-';
+						let box = document.createElement('a-box');
+						box.setAttribute('width', 0.5);
+						box.setAttribute('height', 0.5);
+						box.setAttribute('depth', 0.5);
+						box.setAttribute('position', `${k} 0 ${j}`);
+						box.setAttribute('color', 'red');
+						globalWrapper.append(box);
+					}
+				}
+			}
+			horizontalPlanes.push(row);
+			parseLine(line);
+		} else {
+			for (var k=0; k<m.y*4+1; k++)
+				if (0 == k%4)
+					if (k>0 && m.horiz[(j-1)/2][k/4-1]) {
+						line[k]= ' ';
+					} else {
+						line[k]= '|';
+					}
+				else
+					line[k]= ' ';
+		}
+		if (0 == j) line[1]= line[2]= line[3]= '-';
+		if (m.x*2-1 == j) line[4*m.y]= '|';
+		text.push(line.join('')+'\r\n');
+	}
+	console.log(horizontalPlanes);
+	return text.join('');
+}
+
+function parseLine(line) {
+	let result = [];
+	// console.log('line', line);
+	for (let i = 0; i < line.length - 4; i += 4) {
+		let first = line[i + 1] === '-';
+		let second = line[i + 2] === '-';
+		let third = line[i + 3] === '-';
+		if (first && second && third) {
+			result.push(true);
+		} else {
+			result.push(false)
+		}
+	}
+	console.log(result);
+}
