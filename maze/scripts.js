@@ -1,7 +1,6 @@
 // Overall structure
 // - Generate maze
 // - Render planes based on walls
-// - 
 
 function main() {
     const height = 10;
@@ -104,3 +103,4 @@ function renderVerticalPlanes(arrayOfArrays) {
 }
 
 main();
+
