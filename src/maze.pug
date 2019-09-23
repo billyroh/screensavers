@@ -16,6 +16,11 @@ body
   a-scene( background='color: grey' )
     a-assets
         img( id='brick' src='./assets/brick.bmp' )
-    a-entity( id='plane-wrapper' position='-5 0 -5')
+        img( id='floor' src='./assets/floor.bmp' )
+        img( id='ceiling' src='./assets/ceiling.bmp' )
+        img( id='rat' src='./assets/rat.bmp' )
+        img( id='thing' src='./assets/thing.bmp' )
+    a-entity( id='maze-wrapper' position='-5 0 -5')
+    a-camera( position='0 0.5 0' )
   script( src='maze-generator.js' )
   script( src='scripts.js' )
