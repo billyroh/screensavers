@@ -21,14 +21,14 @@ function renderMaze(maze) {
     // - Encountering smiley face resets
     // - Encountering 20-sided dice thing flips floor to ceiling
     // - Encountering triangular prism flips it again
-    // plus add in renderRat, renderSmileyFace, renderFunWall, etc.
+    // plus add in renderRat, renderSmileyFace, etc.
     // encountering a smiley 
 }
 
 function traverseMaze(maze) {
     let camera = document.querySelector('a-camera');
     let planeHeight = 0.5;
-    camera.setAttribute('position', `0 ${planeHeight / 2} 0`);
+    camera.setAttribute('position', `${_.random(1, maze.width - 1)} ${planeHeight / 2} ${_.random(1, maze.height - 1)}`);
     // 1. Randomly place camera in maze
     // 2. Keep track of path in pathHistoryArray
     // 3. Keep track of path in unexploredPathArray, where at least one of the four sides is both:
@@ -47,7 +47,7 @@ function traverseMaze(maze) {
 }
 
 function renderFloorAndCeiling(width, height) {
-    let mazeWrapper = document.querySelector('a-entity#maze-wrapper');
+    let wrapper = document.querySelector('a-entity#global-wrapper');
     
     let floor = document.createElement('a-plane');
     floor.setAttribute('width', width);
@@ -63,12 +63,13 @@ function renderFloorAndCeiling(width, height) {
     ceiling.setAttribute('rotation', '90 0 0');
     ceiling.setAttribute('position', '4.5 0.5 5');
 
-    mazeWrapper.append(floor);
-    mazeWrapper.append(ceiling);
+    wrapper.append(floor);
+    wrapper.append(ceiling);
 }
 
 function renderHorizontalPlanes(arrayOfArrays) {
     let mazeWrapper = document.querySelector('a-entity#maze-wrapper');
+    let funWallHasRendered = false;
     arrayOfArrays.forEach((planeArray, i) => {
         planeArray.forEach((planeExists, j) => {
             if (planeExists) {
@@ -77,7 +78,15 @@ function renderHorizontalPlanes(arrayOfArrays) {
                 plane.setAttribute('width', 1);
                 plane.setAttribute('height', height);
                 plane.setAttribute('position', `${j} ${height / 2} ${i}`);
-                plane.setAttribute('material', 'side: double; src: #brick; shader: flat');
+
+                // Randomly generate a wall with a different texture
+                if (_.random(0, 100) < 5 && !funWallHasRendered) {
+                    plane.setAttribute('material', 'side: double; src: #thing; shader: flat');
+                    funWallHasRendered = true;
+                } else {
+                    plane.setAttribute('material', 'side: double; src: #brick; shader: flat');
+                }
+
                 mazeWrapper.append(plane);
             }
         })
