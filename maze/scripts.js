@@ -53,14 +53,14 @@ function renderFloorAndCeiling(width, height) {
     let floor = document.createElement('a-plane');
     floor.setAttribute('width', width);
     floor.setAttribute('height', height);
-    floor.setAttribute('material', 'side: double; src: #floor; shader: flat ; repeat: 75 75');
+    floor.setAttribute('material', `side: double; src: #floor; shader: flat ; repeat: ${width * 5} ${height * 5}`);
     floor.setAttribute('rotation', '90 0 0');
     floor.setAttribute('position', '4.5 0 5');
 
     let ceiling = document.createElement('a-plane');
     ceiling.setAttribute('width', width);
     ceiling.setAttribute('height', height);
-    ceiling.setAttribute('material', 'side: double; src: #ceiling; shader: flat ; repeat: 75 75');
+    ceiling.setAttribute('material', `side: double; src: #ceiling; shader: flat ; repeat: ${width * 5} ${height * 5}`);
     ceiling.setAttribute('rotation', '90 0 0');
     ceiling.setAttribute('position', '4.5 0.5 5');
 
