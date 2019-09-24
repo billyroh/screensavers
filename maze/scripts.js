@@ -2,13 +2,13 @@
 // - Generate maze
 // - Render planes based on walls
 
-const mazeHeight = 10;
-const mazeWidth = 10;
+const mazeHeight = 4;
+const mazeWidth = 4;
 const zOffset = 0.5;
 const planeHeight = 0.5;
 const camera = document.querySelector('a-entity#camera-wrapper');
-const animationDelay = 500;
-const animationDelayBuffer = 50;
+const animationDelay = 750;
+const animationDelayBuffer = 100;
 
 // Keep track of...
 // - pathHistoryArray: The path you took to get to the current position, so you can retrace your steps
@@ -23,6 +23,12 @@ async function main() {
     renderMaze(maze);
     console.log(maze);
     await initializeCameraPlacement(camera, maze);
+    await traverseMaze(maze);
+    await traverseMaze(maze);
+    await traverseMaze(maze);
+    await traverseMaze(maze);
+    await traverseMaze(maze);
+    await traverseMaze(maze);
     await traverseMaze(maze);
     await traverseMaze(maze);
     await traverseMaze(maze);
@@ -90,28 +96,54 @@ function renderVerticalPlanes(arrayOfArrays) {
 
 async function traverseMaze(maze) {
     let cameraPosition = camera.getAttribute('position');
-    pathHistoryArray.push(cameraPosition);
-    unexploredPathArray.push(cameraPosition);
+    let viablePositions = getViablePositions(maze, visitedMatrix, cameraPosition);
+
+    // TODO may need to move this block into the else block
+    // Backtracking is pingpong-ing
+    pathHistoryArray.push(Object.assign({}, cameraPosition));
+    unexploredPathArray.push(Object.assign({}, cameraPosition));
+    visitedMatrix.subset(math.index(cameraPosition.x, Math.floor(cameraPosition.z)), 1);
+
+    console.log('');
     console.log('cameraPosition', cameraPosition);
-
-    visitedMatrix.subset(math.index(cameraPosition.x, cameraPosition.z - zOffset), 1);
-
-    let viablePaths = getViablePaths(maze, visitedMatrix, cameraPosition);
+    console.log('pathHistoryArray', pathHistoryArray);
     
-    if (viablePaths.length === 0) {
-        console.log('done');
-        return;
+    if (viablePositions.length === 0) {
+        console.log('backtracking');
+        let previousPosition = pathHistoryArray.pop();
+        let newRotation = getCameraRotation(camera, previousPosition);
+
+        camera.setAttribute('animation__position',`
+            property: position;
+            to: ${previousPosition.x} ${previousPosition.y} ${previousPosition.z};
+            dur: ${animationDelay};
+            easing: linear;
+        `);
+        
+        camera.setAttribute('animation__rotation',`
+            property: rotation;
+            to: ${newRotation};
+            dur: ${animationDelay};
+            easing: linear;
+        `);
+    } else {
+        let newPosition = _.sample(viablePositions);
+        let newRotation = getCameraRotation(camera, newPosition);
+
+        camera.setAttribute('animation__position',`
+            property: position;
+            to: ${newPosition.x} ${newPosition.y} ${newPosition.z};
+            dur: ${animationDelay};
+            easing: linear;
+        `);
+
+        camera.setAttribute('animation__rotation',`
+            property: rotation;
+            to: ${newRotation};
+            dur: ${animationDelay};
+            easing: linear;
+        `);
     }
-
-    let chosenPath = _.sample(viablePaths);
-    await setCameraRotation(camera, chosenPath);
-
-    camera.setAttribute('animation',`
-        property: position;
-        to: ${chosenPath.x} ${chosenPath.y} ${chosenPath.z};
-        dur: ${animationDelay};
-        easing: linear;
-    `);
 
     return new Promise(resolve => {
         setTimeout(resolve, animationDelay + animationDelayBuffer)
@@ -149,57 +181,39 @@ async function initializeCameraPlacement(camera, maze) {
     });
 }
 
-async function setCameraRotation(camera, chosenPath) {
+function getCameraRotation(camera, newPosition) {
     let difference = {
-        x: camera.getAttribute('position').x - chosenPath.x,
-        z: camera.getAttribute('position').z - chosenPath.z,
+        x: camera.getAttribute('position').x - newPosition.x,
+        z: camera.getAttribute('position').z - newPosition.z,
     };
 
-    let rotation;
-
     if (difference.z === -1) {
-        rotation = '0 -180 0';
+        return '0 -180 0';
     } else if (difference.z === 1) {
-        rotation = '0 0 0';
+        return '0 0 0';
     } else if (difference.x === -1) {
-        rotation = '0 -90 0';
+        return '0 -90 0';
     } else if (difference.x === 1) {
-        rotation = '0 90 0';
+        return '0 90 0';
     }
-
-    let delay = 0;
-    let currentRotation = `${camera.getAttribute('rotation').x} ${camera.getAttribute('rotation').y} ${camera.getAttribute('rotation').z}`
-    if (currentRotation !== rotation) {
-        camera.setAttribute('animation',`
-            property: rotation;
-            to: ${rotation};
-            dur: ${animationDelay};
-            easing: linear;
-        `);
-        delay = animationDelay + animationDelayBuffer;
-    }
-
-    return new Promise(resolve => {
-        setTimeout(resolve, delay)
-    })
 }
 
 function renderFloorAndCeiling(width, height) {
-    let wrapper = document.querySelector('a-entity#global-wrapper');
+    let wrapper = document.querySelector('a-entity#maze-wrapper');
     
     let floor = document.createElement('a-plane');
     floor.setAttribute('width', width);
     floor.setAttribute('height', height);
     floor.setAttribute('material', `side: double; src: #floor; shader: flat ; repeat: ${width * 5} ${height * 5}`);
     floor.setAttribute('rotation', '90 0 0');
-    floor.setAttribute('position', '4.5 0 5');
+    floor.setAttribute('position', `${mazeWidth / 2 - zOffset} 0 ${mazeHeight / 2}`);
 
     let ceiling = document.createElement('a-plane');
     ceiling.setAttribute('width', width);
     ceiling.setAttribute('height', height);
     ceiling.setAttribute('material', `side: double; src: #ceiling; shader: flat ; repeat: ${width * 5} ${height * 5}`);
     ceiling.setAttribute('rotation', '90 0 0');
-    ceiling.setAttribute('position', '4.5 0.5 5');
+    ceiling.setAttribute('position', `${mazeWidth / 2 - zOffset} 0.5 ${mazeHeight / 2}`);
 
     wrapper.append(floor);
     // wrapper.append(ceiling);
@@ -210,8 +224,8 @@ function renderFloorAndCeiling(width, height) {
 // 2. Filter out adjacent positions that have already been visited using visited Matrix
 // 3. Return result
 
-function getViablePaths(maze, visitedMatrix, position) {
-    let viablePaths = [];
+function getViablePositions(maze, visitedMatrix, position) {
+    let viablePositions = [];
     let differenceArray = [
         {x: -1, z:  0},
         {x:  1, z:  0},
@@ -233,7 +247,7 @@ function getViablePaths(maze, visitedMatrix, position) {
         // Check if path has already been visited
         let unvisited = false;
         if (xIsInBounds && zIsInBounds) {
-            unvisited = !math.subset(visitedMatrix, math.index(path.x, path.z - zOffset));
+            unvisited = !math.subset(visitedMatrix, math.index(path.x, Math.floor(path.z)));
         }
 
         // Check if path is blocked by a wall
@@ -265,11 +279,11 @@ function getViablePaths(maze, visitedMatrix, position) {
         }
 
         if (xIsInBounds && zIsInBounds && unvisited && accessible) {
-            viablePaths.push(path);
+            viablePositions.push(path);
         }
     }
 
-    return viablePaths;
+    return viablePositions;
 }
 
 main();
