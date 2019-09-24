@@ -2,58 +2,67 @@
 // - Generate maze
 // - Render planes based on walls
 
-const mazeHeight = 4;
-const mazeWidth = 4;
+const mazeHeight = 3;
+const mazeWidth = 3;
 const zOffset = 0.5;
 const planeHeight = 0.5;
+const mazeWrapper = document.querySelector('a-entity#maze-wrapper'); // Wraps walls, floor, ceiling
+const wallWrapper = document.querySelector('a-entity#wall-wrapper'); // Wraps walls
 const camera = document.querySelector('a-entity#camera-wrapper');
 const animationDelay = 750;
-const animationDelayBuffer = 100;
+const animationDelayBuffer = 10;
 
 // Keep track of...
 // - pathHistoryArray: The path you took to get to the current position, so you can retrace your steps
-// - unexploredPathArray: Positions you've been to, where there were unexplored adjacent paths
 // - visitedMatrix: Positions you've been to
 let pathHistoryArray = [];
-let unexploredPathArray = [];
 let visitedMatrix = math.zeros(mazeWidth, mazeHeight);
+
+let goalPosition;
 
 async function main() {
     let maze = generateMazeData(mazeWidth, mazeHeight);
-    renderMaze(maze);
+    await renderMaze(maze);
     console.log(maze);
-    await initializeCameraPlacement(camera, maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
-    await traverseMaze(maze);
+    await initializeMazeEntities();
+    for (let i = 0; i < mazeHeight * mazeWidth * 2; i++){
+        await traverseMaze(maze);
+    }
 }
 
-function renderMaze(maze) {
+async function renderMaze(maze) {
     renderFloorAndCeiling(maze.width, maze.height);
-    renderHorizontalPlanes(maze.horizontalPlanes);
-    renderVerticalPlanes(maze.verticalPlanes);
+    await renderWalls(maze);
+    wallWrapper.setAttribute('scale', '1 0 1');
+    wallWrapper.setAttribute('animation',`
+        property: scale;
+        to: 1 1 1;
+        dur: ${animationDelay};
+        easing: linear;
+    `);
+
+    return new Promise(resolve => {
+        setTimeout(resolve, 0)
+    });
+
     // Rules
     // - Display start button at the star
     // - Encountering smiley face resets
     // - Encountering 20-sided dice thing flips floor to ceiling
     // - Encountering triangular prism flips it again
     // plus add in renderRat, renderSmileyFace, etc.
-    // encountering a smiley 
+}
+
+async function renderWalls(maze) {
+    renderHorizontalPlanes(maze.horizontalPlanes);
+    renderVerticalPlanes(maze.verticalPlanes);
+
+    return new Promise(resolve => {
+        setTimeout(resolve, 0)
+    });
 }
 
 function renderHorizontalPlanes(arrayOfArrays) {
-    let mazeWrapper = document.querySelector('a-entity#maze-wrapper');
     let funWallHasRendered = false;
     arrayOfArrays.forEach((planeArray, i) => {
         planeArray.forEach((planeExists, j) => {
@@ -71,14 +80,13 @@ function renderHorizontalPlanes(arrayOfArrays) {
                     plane.setAttribute('material', 'side: double; src: #brick; shader: flat');
                 }
 
-                mazeWrapper.append(plane);
+                wallWrapper.append(plane);
             }
         })
     })
 }
 
 function renderVerticalPlanes(arrayOfArrays) {
-    let mazeWrapper = document.querySelector('a-entity#maze-wrapper');
     arrayOfArrays.forEach((planeArray, i) => {
         planeArray.forEach((planeExists, j) => {
             if (planeExists) {
@@ -88,30 +96,31 @@ function renderVerticalPlanes(arrayOfArrays) {
                 plane.setAttribute('position', `${j - 0.5} ${planeHeight / 2} ${i + zOffset}`);
                 plane.setAttribute('material', 'side: double; src: #brick; shader: flat');
                 plane.setAttribute('rotation', '0 90 0')
-                mazeWrapper.append(plane);
+                wallWrapper.append(plane);
             }
         })
     })
 }
 
 async function traverseMaze(maze) {
-    let cameraPosition = camera.getAttribute('position');
+    let cameraPosition = getCameraPosition();
     let viablePositions = getViablePositions(maze, visitedMatrix, cameraPosition);
 
-    // TODO may need to move this block into the else block
-    // Backtracking is pingpong-ing
     pathHistoryArray.push(Object.assign({}, cameraPosition));
-    unexploredPathArray.push(Object.assign({}, cameraPosition));
-    visitedMatrix.subset(math.index(cameraPosition.x, Math.floor(cameraPosition.z)), 1);
+    visitedMatrix.subset(math.index(Math.floor(cameraPosition.x), Math.floor(cameraPosition.z)), 1);
 
-    console.log('');
-    console.log('cameraPosition', cameraPosition);
-    console.log('pathHistoryArray', pathHistoryArray);
-    
+    if (Math.floor(cameraPosition.x) === goalPosition.x && Math.floor(cameraPosition.z) === goalPosition.z - zOffset) {
+        console.log('goal reached');
+        return new Promise(resolve => {
+            setTimeout(resolve, animationDelay + animationDelayBuffer)
+        })
+    }
+
     if (viablePositions.length === 0) {
-        console.log('backtracking');
+        pathHistoryArray.pop(); // Discard the latest
         let previousPosition = pathHistoryArray.pop();
-        let newRotation = getCameraRotation(camera, previousPosition);
+        let newRotation = getCameraRotation(previousPosition);
+        console.log('backtracking');
 
         camera.setAttribute('animation__position',`
             property: position;
@@ -128,7 +137,7 @@ async function traverseMaze(maze) {
         `);
     } else {
         let newPosition = _.sample(viablePositions);
-        let newRotation = getCameraRotation(camera, newPosition);
+        let newRotation = getCameraRotation(newPosition);
 
         camera.setAttribute('animation__position',`
             property: position;
@@ -166,29 +175,66 @@ async function traverseMaze(maze) {
     // - Prism: Flip
 }
 
-async function initializeCameraPlacement(camera, maze) {
-    let x = _.random(1, maze.width - 1);
+function getCameraPosition() {
+    let position = camera.getAttribute('position');
+    let foo = {
+        x: Math.round(position.x),
+        y: planeHeight / 2,
+        z: Math.floor(position.z) + zOffset,
+    };
+
+    return {
+        x: Math.round(position.x),
+        y: planeHeight / 2,
+        z: Math.floor(position.z) + zOffset,
+    }
+}
+
+async function initializeMazeEntities() {
+    let x, z;
     let y = planeHeight / 2;
-    let z = _.random(1, maze.height - 1) + zOffset;
 
-    x = maze.width - 1;
-    z = maze.height - 1 + zOffset;
+    let xArray = [];
+    for (let x = 0; x < mazeWidth; x++) {
+        xArray.push(x);
+    }
+    xArray = _.shuffle(xArray);
+    
+    let zArray = [];
+    for (let z = 0; z < mazeHeight; z++) {
+        zArray.push(z);
+    }
+    zArray = _.shuffle(zArray);
 
+    // Camera
+    x = xArray.pop();
+    z = zArray.pop() + zOffset;
     camera.setAttribute('position', `${x} ${y} ${z}`);
 
+    // Goal
+    x = xArray.pop();
+    z = zArray.pop() + zOffset;
+    let goal = document.createElement('a-sphere');
+    goal.setAttribute('color', 'red');
+    goal.setAttribute('radius', 0.1);
+    goal.setAttribute('position', `${x} ${y} ${z}`);
+    mazeWrapper.append(goal);
+    goalPosition = { x, y, z };
+    
     return new Promise(resolve => {
-        setTimeout(resolve, 100)
+        setTimeout(resolve, 1000)
     });
 }
 
-function getCameraRotation(camera, newPosition) {
+function getCameraRotation(newPosition) {
+    let currentPosition = getCameraPosition();
     let difference = {
-        x: camera.getAttribute('position').x - newPosition.x,
-        z: camera.getAttribute('position').z - newPosition.z,
+        x: currentPosition.x - newPosition.x,
+        z: currentPosition.z - newPosition.z,
     };
 
     if (difference.z === -1) {
-        return '0 -180 0';
+        return '0 180 0';
     } else if (difference.z === 1) {
         return '0 0 0';
     } else if (difference.x === -1) {
@@ -199,8 +245,6 @@ function getCameraRotation(camera, newPosition) {
 }
 
 function renderFloorAndCeiling(width, height) {
-    let wrapper = document.querySelector('a-entity#maze-wrapper');
-    
     let floor = document.createElement('a-plane');
     floor.setAttribute('width', width);
     floor.setAttribute('height', height);
@@ -215,8 +259,8 @@ function renderFloorAndCeiling(width, height) {
     ceiling.setAttribute('rotation', '90 0 0');
     ceiling.setAttribute('position', `${mazeWidth / 2 - zOffset} 0.5 ${mazeHeight / 2}`);
 
-    wrapper.append(floor);
-    // wrapper.append(ceiling);
+    mazeWrapper.append(floor);
+    mazeWrapper.append(ceiling);
 }
 
 // 1. Get array of four adjacent positions
@@ -235,9 +279,9 @@ function getViablePositions(maze, visitedMatrix, position) {
 
     for (const difference of differenceArray) {
         let path = {
-            x: position.x + difference.x,
+            x: Math.round(position.x) + difference.x,
             y: position.y,
-            z: position.z + difference.z,
+            z: Math.floor(position.z) + zOffset + difference.z,
         };
 
         // Check if path is within bounds of the maze
