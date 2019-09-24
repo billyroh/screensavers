@@ -6,12 +6,30 @@ const mazeHeight = 10;
 const mazeWidth = 10;
 const zOffset = 0.5;
 const planeHeight = 0.5;
+const camera = document.querySelector('a-entity#camera-wrapper');
+const animationDelay = 500;
+const animationDelayBuffer = 50;
+
+// Keep track of...
+// - pathHistoryArray: The path you took to get to the current position, so you can retrace your steps
+// - unexploredPathArray: Positions you've been to, where there were unexplored adjacent paths
+// - visitedMatrix: Positions you've been to
+let pathHistoryArray = [];
+let unexploredPathArray = [];
+let visitedMatrix = math.zeros(mazeWidth, mazeHeight);
 
 async function main() {
     let maze = generateMazeData(mazeWidth, mazeHeight);
     renderMaze(maze);
     console.log(maze);
-
+    await initializeCameraPlacement(camera, maze);
+    await traverseMaze(maze);
+    await traverseMaze(maze);
+    await traverseMaze(maze);
+    await traverseMaze(maze);
+    await traverseMaze(maze);
+    await traverseMaze(maze);
+    await traverseMaze(maze);
     await traverseMaze(maze);
 }
 
@@ -71,36 +89,32 @@ function renderVerticalPlanes(arrayOfArrays) {
 }
 
 async function traverseMaze(maze) {
-    // Randomly place camera in maze
-    let camera = document.querySelector('a-entity#camera-wrapper');
-    await initializeCameraPlacement(camera, maze);
-
-    // Keep track of...
-    // - pathHistoryArray: The path you took to get to the current position, so you can retrace your steps
-    // - unexploredPathArray: Positions you've been to, where there were unexplored adjacent paths
-    // - visitedMatrix: Positions you've been to
-    let pathHistoryArray = [];
-    let unexploredPathArray = [];
-    let visitedMatrix = math.zeros(maze.width, maze.height);
-
     let cameraPosition = camera.getAttribute('position');
     pathHistoryArray.push(cameraPosition);
     unexploredPathArray.push(cameraPosition);
+    console.log('cameraPosition', cameraPosition);
+
     visitedMatrix.subset(math.index(cameraPosition.x, cameraPosition.z - zOffset), 1);
 
     let viablePaths = getViablePaths(maze, visitedMatrix, cameraPosition);
+    
+    if (viablePaths.length === 0) {
+        console.log('done');
+        return;
+    }
+
     let chosenPath = _.sample(viablePaths);
-    setCameraRotation(camera, chosenPath);
+    await setCameraRotation(camera, chosenPath);
 
     camera.setAttribute('animation',`
         property: position;
         to: ${chosenPath.x} ${chosenPath.y} ${chosenPath.z};
-        dur: 1000;
+        dur: ${animationDelay};
         easing: linear;
-    `)
+    `);
 
     return new Promise(resolve => {
-        setTimeout(resolve, 0)
+        setTimeout(resolve, animationDelay + animationDelayBuffer)
     })
 
     // 1. Randomly place camera in maze
@@ -135,21 +149,39 @@ async function initializeCameraPlacement(camera, maze) {
     });
 }
 
-function setCameraRotation(camera, chosenPath) {
+async function setCameraRotation(camera, chosenPath) {
     let difference = {
         x: camera.getAttribute('position').x - chosenPath.x,
         z: camera.getAttribute('position').z - chosenPath.z,
     };
 
+    let rotation;
+
     if (difference.z === -1) {
-        camera.setAttribute('rotation', '0 -180 0');
+        rotation = '0 -180 0';
     } else if (difference.z === 1) {
-        camera.setAttribute('rotation', '0 0 0');
+        rotation = '0 0 0';
     } else if (difference.x === -1) {
-        camera.setAttribute('rotation', '0 -90 0');
+        rotation = '0 -90 0';
     } else if (difference.x === 1) {
-        camera.setAttribute('rotation', '0 90 0');
+        rotation = '0 90 0';
     }
+
+    let delay = 0;
+    let currentRotation = `${camera.getAttribute('rotation').x} ${camera.getAttribute('rotation').y} ${camera.getAttribute('rotation').z}`
+    if (currentRotation !== rotation) {
+        camera.setAttribute('animation',`
+            property: rotation;
+            to: ${rotation};
+            dur: ${animationDelay};
+            easing: linear;
+        `);
+        delay = animationDelay + animationDelayBuffer;
+    }
+
+    return new Promise(resolve => {
+        setTimeout(resolve, delay)
+    })
 }
 
 function renderFloorAndCeiling(width, height) {
@@ -178,7 +210,6 @@ function renderFloorAndCeiling(width, height) {
 // 2. Filter out adjacent positions that have already been visited using visited Matrix
 // 3. Return result
 
-// TODO seems to break when spawned at edge
 function getViablePaths(maze, visitedMatrix, position) {
     let viablePaths = [];
     let differenceArray = [
@@ -196,8 +227,8 @@ function getViablePaths(maze, visitedMatrix, position) {
         };
 
         // Check if path is within bounds of the maze
-        let xIsInBounds = path.x >= 0 && path.x <= maze.width - 1;
-        let zIsInBounds = path.z >= 0 && path.z <= maze.height;
+        let xIsInBounds = path.x >= 0 && path.x < maze.width;
+        let zIsInBounds = path.z >= 0 && path.z < maze.height;
 
         // Check if path has already been visited
         let unvisited = false;
