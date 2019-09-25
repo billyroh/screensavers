@@ -236,10 +236,12 @@ async function initializeMazeEntities() {
     // Goal
     x = xArray.pop();
     z = zArray.pop() + zOffset;
-    let goal = document.createElement('a-sphere');
-    goal.setAttribute('color', 'red');
-    goal.setAttribute('radius', 0.1);
+    let goal = document.createElement('a-circle');
+    goal.setAttribute('material', 'src: #smiley; shader: flat');
+    goal.setAttribute('radius', 0.2);
+    goal.setAttribute('opacity', 0.5);
     goal.setAttribute('position', `${x} ${y} ${z}`);
+    goal.setAttribute('look-at', '[camera]');
     entityWrapper.append(goal);
     goalPosition = { x, y, z };
     
