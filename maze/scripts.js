@@ -129,12 +129,12 @@ async function traverseMaze(maze) {
     
     // Ico reached
     } else if (cameraPositionIsAt(icoPosition)) {
-        camera.setAttribute('animation__rotate',`
-            property: rotation;
-            to: 0 0 180;
-            dur: ${animationDelay};
-            easing: linear;
-        `);
+        // camera.setAttribute('animation__rotate',`
+        //     property: rotation;
+        //     to: 0 0 180;
+        //     dur: ${animationDelay};
+        //     easing: linear;
+        // `);
     
     // Hit a deadend; backtrack
     } else if (viablePositions.length === 0) {
