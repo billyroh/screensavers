@@ -11,7 +11,7 @@ const wallWrapper = document.querySelector('a-entity#wall-wrapper'); // Wraps wa
 const entityWrapper = document.querySelector('a-entity#entity-wrapper'); // Wraps maze entities (e.g. smiley faces, rats, etc.)
 const camera = document.querySelector('a-entity#camera-wrapper');
 const animationDelay = 750;
-const animationDelayBuffer = 0;
+const animationDelayBuffer = 250;
 
 // Keep track of...
 // - pathHistoryArray: The path you took to get to the current position, so you can retrace your steps
@@ -110,12 +110,12 @@ async function traverseMaze(maze) {
     let viablePositions = getViablePositions(maze, visitedMatrix, cameraPosition);
 
     pathHistoryArray.push(Object.assign({}, cameraPosition));
-    visitedMatrix.subset(math.index(Math.floor(cameraPosition.x), Math.floor(cameraPosition.z)), 1);
+    visitedMatrix.subset(math.index(cameraPosition.x, Math.floor(cameraPosition.z)), 1);
     camera.removeAttribute('animation__position');
     camera.removeAttribute('animation__rotation');
 
     // Goal reached
-    if (cameraPositionIsAt(goalPosition)) {
+    if (false && cameraPositionIsEqualTo(goalPosition)) {
         wallWrapper.setAttribute('animation__fade-out',`
             property: scale;
             to: 1 0 1;
@@ -126,21 +126,52 @@ async function traverseMaze(maze) {
         return new Promise(resolve => {
             setTimeout(resolve, animationDelay + animationDelayBuffer)
         })
-    
+    }
+
+    let ico = document.querySelector('a-icosahedron');
+    let icoIsVisible = ico.getAttribute('visible');
+    let octa = document.querySelector('a-octahedron');
+    let octaIsVisible = octa.getAttribute('visible');
+
     // Ico reached
-    } else if (cameraPositionIsAt(icoPosition)) {
-        // camera.setAttribute('animation__rotate',`
-        //     property: rotation;
-        //     to: 0 0 180;
-        //     dur: ${animationDelay};
-        //     easing: linear;
-        // `);
+    if (cameraPositionIsEqualTo(icoPosition) && icoIsVisible) {
+        console.log('ico', ico);
+        camera.setAttribute('animation__rotation',`
+            property: rotation;
+            to: 0 0 180;
+            dur: ${animationDelay};
+            easing: linear;
+        `);
+        ico.setAttribute('visible', 'false');
+        octa.setAttribute('visible', 'true');
+
+        return new Promise(resolve => {
+            setTimeout(resolve, animationDelay + animationDelayBuffer)
+        })
+    }
+
+    // Octa reached
+    if (cameraPositionIsEqualTo(octaPosition) && octaIsVisible) {
+        console.log('octa', octa);
+        camera.setAttribute('animation__rotation',`
+            property: rotation;
+            to: 0 0 0;
+            dur: ${animationDelay};
+            easing: linear;
+        `);
+
+        octa.setAttribute('visible', 'false');
+        return new Promise(resolve => {
+            setTimeout(resolve, animationDelay + animationDelayBuffer)
+        })
+    }
     
+    // TODO this block seems to be buggy when flipping the camera
     // Hit a deadend; backtrack
-    } else if (viablePositions.length === 0) {
+    if (viablePositions.length === 0) {
         pathHistoryArray.pop(); // Discard the latest
         let previousPosition = pathHistoryArray.pop();
-        let newRotation = getCameraRotation(previousPosition);
+        let newRotation = await getCameraRotation(previousPosition);
 
         camera.setAttribute('animation__position',`
             property: position;
@@ -159,10 +190,7 @@ async function traverseMaze(maze) {
     // Traverse towards an unvisited position
     } else {
         let newPosition = _.sample(viablePositions);
-        let newRotation = getCameraRotation(newPosition);
-
-        camera.removeAttribute('animation__position');
-        camera.removeAttribute('animation__rotation');
+        let newRotation = await getCameraRotation(newPosition);
 
         camera.setAttribute('animation__position',`
             property: position;
@@ -180,7 +208,7 @@ async function traverseMaze(maze) {
     }
 
     return new Promise(resolve => {
-        setTimeout(resolve, animationDelay + animationDelayBuffer)
+        setTimeout(resolve, animationDelay)
     })
 
     // 1. Randomly place camera in maze
@@ -211,35 +239,34 @@ function getCameraPosition() {
     }
 }
 
-function cameraPositionIsAt(position) {
+function cameraPositionIsEqualTo(position) {
     let cameraPosition = getCameraPosition();
-    return cameraPosition.x === position.x && cameraPosition.z === position.z - zOffset;
+    return cameraPosition.x === position.x && cameraPosition.z === position.z;
 }
 
 async function initializeMazeEntities() {
-    let x, z;
+    let x, z, position;
     let y = planeHeight / 2;
+    let positionArray = [];
 
-    let xArray = [];
     for (let x = 0; x < mazeWidth; x++) {
-        xArray.push(x);
+        for (let z = 0; z < mazeHeight; z++) {
+            positionArray.push({ x, z })
+        }
     }
-    xArray = _.shuffle(xArray);
-    
-    let zArray = [];
-    for (let z = 0; z < mazeHeight; z++) {
-        zArray.push(z);
-    }
-    zArray = _.shuffle(zArray);
+    positionArray = _.shuffle(positionArray);
 
     // Camera
-    x = xArray.pop();
-    z = zArray.pop() + zOffset;
+    position = positionArray.pop();
+    x = position.x;
+    z = position.z + zOffset;
     camera.setAttribute('position', `${x} ${y} ${z}`);
+    camera.setAttribute('rotation', `0 0 0`);
 
     // Goal
-    x = xArray.pop();
-    z = zArray.pop() + zOffset;
+    position = positionArray.pop();
+    x = position.x;
+    z = position.z + zOffset;
     let goal = document.createElement('a-sphere');
     goal.setAttribute('color', 'red');
     goal.setAttribute('radius', 0.1);
@@ -248,23 +275,41 @@ async function initializeMazeEntities() {
     goalPosition = { x, y, z };
 
     // Icosahedron (aka 20-sided die)
-    x = xArray.pop();
-    z = zArray.pop() + zOffset;
+    position = positionArray.pop();
+    x = position.x;
+    z = position.z + zOffset;
     let ico = document.createElement('a-icosahedron')
     ico.setAttribute('color', 'grey')
     ico.setAttribute('radius', 0.1);
     ico.setAttribute('position', `${x} ${y} ${z}`);
+    ico.setAttribute('material', `metalness: 0.3`);
+    ico.setAttribute('animation',`
+        property: rotation;
+        to: 0 180 180;
+        dur: ${animationDelay};
+        easing: linear;
+        loop: true;
+    `);
     entityWrapper.append(ico);
     icoPosition = { x, y, z };
 
     // Octahedron
-    x = xArray.pop();
-    z = zArray.pop() + zOffset;
+    position = positionArray.pop();
+    x = position.x;
+    z = position.z + zOffset;
     let octa = document.createElement('a-octahedron');
     octa.setAttribute('color', 'grey')
     octa.setAttribute('radius', 0.1);
     octa.setAttribute('position', `${x} ${y} ${z}`);
     octa.setAttribute('visible', false);
+    octa.setAttribute('material', `metalness: 0.3`);
+    octa.setAttribute('animation',`
+        property: rotation;
+        to: 0 180 180;
+        dur: ${animationDelay};
+        easing: linear;
+        loop: true;
+    `);
     entityWrapper.append(octa);
     octaPosition = { x, y, z };
     
@@ -273,21 +318,26 @@ async function initializeMazeEntities() {
     });
 }
 
-function getCameraRotation(newPosition) {
+async function getCameraRotation(newPosition) {
     let currentPosition = getCameraPosition();
+    let currentZRotation = 0;
+    if (camera.getAttribute('rotation').z > 100) {
+        currentZRotation = 180;
+    }
+    
     let difference = {
         x: currentPosition.x - newPosition.x,
         z: currentPosition.z - newPosition.z,
     };
 
     if (difference.z === -1) {
-        return '0 180 0';
+        return `0 180 ${currentZRotation}`;
     } else if (difference.z === 1) {
-        return '0 0 0';
+        return `0 0 ${currentZRotation}`;
     } else if (difference.x === -1) {
-        return '0 -90 0';
+        return `0 -90 ${currentZRotation}`;
     } else if (difference.x === 1) {
-        return '0 90 0';
+        return `0 90 ${currentZRotation}`;
     }
 }
 
@@ -326,9 +376,9 @@ function getViablePositions(maze, visitedMatrix, position) {
 
     for (const difference of differenceArray) {
         let path = {
-            x: Math.round(position.x) + difference.x,
+            x: position.x + difference.x,
             y: position.y,
-            z: Math.floor(position.z) + zOffset + difference.z,
+            z: position.z + difference.z,
         };
 
         // Check if path is within bounds of the maze
@@ -392,5 +442,7 @@ async function cleanUp() {
     });
 }
 
+let globalWapper = document.querySelector('a-entity#global-wrapper');
+globalWapper.setAttribute('position', `${mazeWidth / -2 + zOffset} 0 ${mazeHeight / -2}`);
 renderFloorAndCeiling(mazeWidth, mazeHeight);
 main();
