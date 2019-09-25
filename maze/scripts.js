@@ -18,12 +18,13 @@ const animationDelayBuffer = 10;
 // - visitedMatrix: Positions you've been to
 let pathHistoryArray = [];
 let visitedMatrix = math.zeros(mazeWidth, mazeHeight);
+let maze;
 
 let goalPosition;
 let goalReached = false;
 
 async function main() {
-    let maze = generateMazeData(mazeWidth, mazeHeight);
+    maze = generateMazeData(mazeWidth, mazeHeight);
     await renderMaze(maze);
     console.log(maze);
     await initializeMazeEntities();
@@ -258,6 +259,22 @@ async function initializeMazeEntities() {
     x = position.x;
     z = position.z + zOffset;
     camera.setAttribute('position', `${x} ${y} ${z}`);
+
+    // Start button
+    position = _.sample(getViablePositions(maze, visitedMatrix, {x, y, z}));
+    _.remove(positionArray, (p) => {
+        return p.x === position.x && p.z === position.z - zOffset;
+    })
+    let startButton = document.createElement('a-image');
+    x = position.x;
+    z = position.z;
+    startButton.setAttribute('material', 'src: #start-button; side: double; shader: flat');
+    startButton.setAttribute('width', 0.75);
+    startButton.setAttribute('height', 0.25);
+    startButton.setAttribute('opacity', 0.5);
+    startButton.setAttribute('position', `${x} ${y} ${z}`);
+    startButton.setAttribute('look-at', '[camera]');
+    wallWrapper.append(startButton);
 
     // Goal
     position = positionArray.pop();
