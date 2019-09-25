@@ -27,11 +27,11 @@ async function main() {
     await renderMaze(maze);
     console.log(maze);
     await initializeMazeEntities();
-    while (!goalReached) {
-        await traverseMaze(maze);
-    }
-    await cleanUp();
-    main();
+    // while (!goalReached) {
+    //     await traverseMaze(maze);
+    // }
+    // await cleanUp();
+    // main();
 }
 
 async function cleanUp() {
@@ -213,37 +213,48 @@ function getCameraPosition() {
 }
 
 async function initializeMazeEntities() {
-    let x, z;
+    let x, z, position;
+    let positionArray = [];
     let y = planeHeight / 2;
 
-    let xArray = [];
+    // Create array of all possible positions to prevent collisions
     for (let x = 0; x < mazeWidth; x++) {
-        xArray.push(x);
+        for (let z = 0; z < mazeHeight; z++) {
+            positionArray.push({x, z})
+        }
     }
-    xArray = _.shuffle(xArray);
-    
-    let zArray = [];
-    for (let z = 0; z < mazeHeight; z++) {
-        zArray.push(z);
-    }
-    zArray = _.shuffle(zArray);
+    positionArray = _.shuffle(positionArray);
 
     // Camera
-    x = xArray.pop();
-    z = zArray.pop() + zOffset;
+    position = positionArray.pop();
+    x = position.x;
+    z = position.z + zOffset;
     camera.setAttribute('position', `${x} ${y} ${z}`);
 
     // Goal
-    x = xArray.pop();
-    z = zArray.pop() + zOffset;
+    position = positionArray.pop();
+    x = position.x;
+    z = position.z + zOffset;
     let goal = document.createElement('a-circle');
-    goal.setAttribute('material', 'src: #smiley; shader: flat');
+    goal.setAttribute('material', 'src: #smiley; side: double; shader: flat');
     goal.setAttribute('radius', 0.2);
     goal.setAttribute('opacity', 0.5);
     goal.setAttribute('position', `${x} ${y} ${z}`);
     goal.setAttribute('look-at', '[camera]');
     entityWrapper.append(goal);
     goalPosition = { x, y, z };
+
+    // Rat
+    position = positionArray.pop();
+    x = position.x;
+    z = position.z + zOffset;
+    let rat = document.createElement('a-image');
+    rat.setAttribute('material', 'src: #rat; side: double; shader: flat');
+    rat.setAttribute('width', 0.4);
+    rat.setAttribute('height', 0.25);
+    rat.setAttribute('position', `${x} 0.125 ${z}`);
+    rat.setAttribute('look-at', '[camera]')
+    entityWrapper.append(rat);
     
     return new Promise(resolve => {
         setTimeout(resolve, 1000)
