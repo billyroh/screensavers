@@ -111,8 +111,6 @@ async function traverseMaze(maze) {
 
     pathHistoryArray.push(Object.assign({}, cameraPosition));
     visitedMatrix.subset(math.index(cameraPosition.x, Math.floor(cameraPosition.z)), 1);
-    camera.removeAttribute('animation__position');
-    camera.removeAttribute('animation__rotation');
 
     // Goal reached
     if (false && cameraPositionIsEqualTo(goalPosition)) {
@@ -135,34 +133,34 @@ async function traverseMaze(maze) {
 
     // Ico reached
     if (cameraPositionIsEqualTo(icoPosition) && icoIsVisible) {
-        console.log('ico', ico);
-        camera.setAttribute('animation__rotation',`
-            property: rotation;
-            to: 0 0 180;
+        camera.setAttribute('animation__rotation_z',`
+            property: rotation.z;
+            to: 180;
             dur: ${animationDelay};
             easing: linear;
         `);
         ico.setAttribute('visible', 'false');
         octa.setAttribute('visible', 'true');
 
+        console.log('ico', camera.getAttribute('rotation'));
         return new Promise(resolve => {
-            setTimeout(resolve, animationDelay + animationDelayBuffer)
+            setTimeout(resolve, animationDelay * 2);
         })
     }
 
     // Octa reached
     if (cameraPositionIsEqualTo(octaPosition) && octaIsVisible) {
-        console.log('octa', octa);
-        camera.setAttribute('animation__rotation',`
-            property: rotation;
-            to: 0 0 0;
+        camera.setAttribute('animation__rotation_z',`
+            property: rotation.z;
+            to: 0;
             dur: ${animationDelay};
             easing: linear;
         `);
-
         octa.setAttribute('visible', 'false');
+
+        console.log('octa', camera.getAttribute('rotation'));
         return new Promise(resolve => {
-            setTimeout(resolve, animationDelay + animationDelayBuffer)
+            setTimeout(resolve, animationDelay * 2);
         })
     }
     
@@ -171,7 +169,8 @@ async function traverseMaze(maze) {
     if (viablePositions.length === 0) {
         pathHistoryArray.pop(); // Discard the latest
         let previousPosition = pathHistoryArray.pop();
-        let newRotation = await getCameraRotation(previousPosition);
+        let yRotation = getCameraYRotation(previousPosition);
+
 
         camera.setAttribute('animation__position',`
             property: position;
@@ -179,18 +178,42 @@ async function traverseMaze(maze) {
             dur: ${animationDelay};
             easing: linear;
         `);
-        
-        camera.setAttribute('animation__rotation',`
+
+        console.log('yRotation', yRotation);
+        console.log('backtracking pt. 1', camera.getAttribute('rotation'));
+        let zRotation = '0';
+        if (!icoIsVisible && !octaIsVisible) {
+            zRotation = '0';
+        } else if (!icoIsVisible) {
+            zRotation = '180';
+        } else {
+            zRotation = '0';
+        }
+
+        camera.setAttribute('animation__rotation_y',`
             property: rotation;
-            to: ${newRotation};
+            to: 0 ${yRotation} ${zRotation};
             dur: ${animationDelay};
             easing: linear;
         `);
+
+        if (!icoIsVisible && !octaIsVisible) {
+            console.log('both invisible');
+            camera.setAttribute('rotation.z', '0');
+        } else if (!icoIsVisible) {
+            console.log('should be upside down');
+            camera.setAttribute('rotation.z', '180');
+        } else {
+            console.log('base case');
+            camera.setAttribute('rotation.z', '0');
+        }
+
+        console.log('backtracking pt. 2', camera.getAttribute('rotation'));
     
     // Traverse towards an unvisited position
     } else {
         let newPosition = _.sample(viablePositions);
-        let newRotation = await getCameraRotation(newPosition);
+        let yRotation = getCameraYRotation(newPosition);
 
         camera.setAttribute('animation__position',`
             property: position;
@@ -199,12 +222,25 @@ async function traverseMaze(maze) {
             easing: linear;
         `);
 
-        camera.setAttribute('animation__rotation',`
+        console.log('yRotation', yRotation);
+        console.log('new position pt. 1', camera.getAttribute('rotation'));
+        let zRotation = '0';
+        if (!icoIsVisible && !octaIsVisible) {
+            zRotation = '0';
+        } else if (!icoIsVisible) {
+            zRotation = '180';
+        } else {
+            zRotation = '0';
+        }
+
+        camera.setAttribute('animation__rotation_y',`
             property: rotation;
-            to: ${newRotation};
+            to: 0 ${yRotation} ${zRotation};
             dur: ${animationDelay};
             easing: linear;
         `);
+
+        console.log('new position pt. 2', camera.getAttribute('rotation'));
     }
 
     return new Promise(resolve => {
@@ -285,7 +321,7 @@ async function initializeMazeEntities() {
     ico.setAttribute('material', `metalness: 0.3`);
     ico.setAttribute('animation',`
         property: rotation;
-        to: 0 180 180;
+        to: 180 180 180;
         dur: ${animationDelay};
         easing: linear;
         loop: true;
@@ -305,7 +341,7 @@ async function initializeMazeEntities() {
     octa.setAttribute('material', `metalness: 0.3`);
     octa.setAttribute('animation',`
         property: rotation;
-        to: 0 180 180;
+        to: 180 180 180;
         dur: ${animationDelay};
         easing: linear;
         loop: true;
@@ -318,7 +354,7 @@ async function initializeMazeEntities() {
     });
 }
 
-async function getCameraRotation(newPosition) {
+function getCameraYRotation(newPosition) {
     let currentPosition = getCameraPosition();
     let currentZRotation = 0;
     if (camera.getAttribute('rotation').z > 100) {
@@ -331,14 +367,43 @@ async function getCameraRotation(newPosition) {
     };
 
     if (difference.z === -1) {
-        return `0 180 ${currentZRotation}`;
+        return '180';
     } else if (difference.z === 1) {
-        return `0 0 ${currentZRotation}`;
+        return '0';
     } else if (difference.x === -1) {
-        return `0 -90 ${currentZRotation}`;
+        return '-90';
     } else if (difference.x === 1) {
-        return `0 90 ${currentZRotation}`;
+        return '90';
+    } else {
+        return '0';
     }
+}
+
+function setCameraRotation(newPosition) {
+    let currentPosition = getCameraPosition();
+    let value;
+    
+    let difference = {
+        x: currentPosition.x - newPosition.x,
+        z: currentPosition.z - newPosition.z,
+    };
+
+    if (difference.z === -1) {
+        value = '180';
+    } else if (difference.z === 1) {
+        value = '0';
+    } else if (difference.x === -1) {
+        value = '-90';
+    } else if (difference.x === 1) {
+        value = '90';
+    }
+
+    camera.setAttribute('animation__rotation_y',`
+        property: rotation.y;
+        to: ${value};
+        dur: ${animationDelay};
+        easing: linear;
+    `);
 }
 
 function renderFloorAndCeiling(width, height) {
