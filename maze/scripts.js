@@ -259,6 +259,30 @@ async function initializeMazeEntities() {
     z = position.z + zOffset;
     camera.setAttribute('position', `${x} ${y} ${z}`);
 
+    // Start button
+    position = positionArray.pop();
+    x = position.x;
+    z = position.z + zOffset;
+    let difference = _.shuffle([
+        {x: -1, z:  0},
+        {x:  1, z:  0},
+        {x:  0, z: -1},
+        {x:  0, z:  1},
+    ]).pop();
+    x += difference.x;
+    z += difference.z;
+    _.remove(positionArray, (position) => {
+        return position.x === x && position.z === z;
+    })
+    let startButton = document.createElement('a-image');
+    startButton.setAttribute('material', 'src: #start-button; side: double; shader: flat');
+    startButton.setAttribute('width', 0.75);
+    startButton.setAttribute('height', 0.25);
+    startButton.setAttribute('opacity', 0.5);
+    startButton.setAttribute('position', `${x} ${y} ${z}`);
+    startButton.setAttribute('look-at', '[camera]');
+    entityWrapper.append(startButton);
+
     // Goal
     position = positionArray.pop();
     x = position.x;
