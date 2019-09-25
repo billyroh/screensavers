@@ -11,7 +11,7 @@ const wallWrapper = document.querySelector('a-entity#wall-wrapper'); // Wraps wa
 const entityWrapper = document.querySelector('a-entity#entity-wrapper'); // Wraps maze entities (e.g. smiley faces, rats, etc.)
 const camera = document.querySelector('a-entity#camera-wrapper');
 const animationDelay = 750;
-const animationDelayBuffer = 10;
+const animationDelayBuffer = 0;
 
 // Keep track of...
 // - pathHistoryArray: The path you took to get to the current position, so you can retrace your steps
@@ -19,13 +19,13 @@ const animationDelayBuffer = 10;
 let pathHistoryArray = [];
 let visitedMatrix = math.zeros(mazeWidth, mazeHeight);
 
-let goalPosition;
+let goalPosition, icoPosition, octaPosition;
 let goalReached = false;
 
 async function main() {
     let maze = generateMazeData(mazeWidth, mazeHeight);
-    await renderMaze(maze);
     console.log(maze);
+    await renderMaze(maze);
     await initializeMazeEntities();
     while (!goalReached) {
         await traverseMaze(maze);
@@ -34,23 +34,7 @@ async function main() {
     main();
 }
 
-async function cleanUp() {
-    goalPosition = null;
-    goalReached = false;
-    pathHistoryArray = [];
-    visitedMatrix = math.zeros(mazeWidth, mazeHeight);
-    wallWrapper.innerHTML = '';
-    wallWrapper.removeAttribute('animation__fade-out');
-    wallWrapper.removeAttribute('animation__fade-in');
-    entityWrapper.innerHTML = '';
-    
-    return new Promise(resolve => {
-        setTimeout(resolve, animationDelay)
-    });
-}
-
 async function renderMaze(maze) {
-    renderFloorAndCeiling(maze.width, maze.height);
     await renderWalls(maze);
     wallWrapper.setAttribute('scale', '1 0 1');
     wallWrapper.setAttribute('animation__fade-in',`
@@ -127,23 +111,33 @@ async function traverseMaze(maze) {
 
     pathHistoryArray.push(Object.assign({}, cameraPosition));
     visitedMatrix.subset(math.index(Math.floor(cameraPosition.x), Math.floor(cameraPosition.z)), 1);
+    camera.removeAttribute('animation__position');
+    camera.removeAttribute('animation__rotation');
 
-    if (Math.floor(cameraPosition.x) === goalPosition.x && Math.floor(cameraPosition.z) === goalPosition.z - zOffset) {
+    // Goal reached
+    if (cameraPositionIsAt(goalPosition)) {
         wallWrapper.setAttribute('animation__fade-out',`
             property: scale;
             to: 1 0 1;
             dur: ${animationDelay};
             easing: linear;
         `);
-        
         goalReached = true;
-
         return new Promise(resolve => {
             setTimeout(resolve, animationDelay + animationDelayBuffer)
         })
-    }
-
-    if (viablePositions.length === 0) {
+    
+    // Ico reached
+    } else if (cameraPositionIsAt(icoPosition)) {
+        camera.setAttribute('animation__rotate',`
+            property: rotation;
+            to: 0 0 180;
+            dur: ${animationDelay};
+            easing: linear;
+        `);
+    
+    // Hit a deadend; backtrack
+    } else if (viablePositions.length === 0) {
         pathHistoryArray.pop(); // Discard the latest
         let previousPosition = pathHistoryArray.pop();
         let newRotation = getCameraRotation(previousPosition);
@@ -161,9 +155,14 @@ async function traverseMaze(maze) {
             dur: ${animationDelay};
             easing: linear;
         `);
+    
+    // Traverse towards an unvisited position
     } else {
         let newPosition = _.sample(viablePositions);
         let newRotation = getCameraRotation(newPosition);
+
+        camera.removeAttribute('animation__position');
+        camera.removeAttribute('animation__rotation');
 
         camera.setAttribute('animation__position',`
             property: position;
@@ -212,6 +211,11 @@ function getCameraPosition() {
     }
 }
 
+function cameraPositionIsAt(position) {
+    let cameraPosition = getCameraPosition();
+    return cameraPosition.x === position.x && cameraPosition.z === position.z - zOffset;
+}
+
 async function initializeMazeEntities() {
     let x, z;
     let y = planeHeight / 2;
@@ -242,9 +246,30 @@ async function initializeMazeEntities() {
     goal.setAttribute('position', `${x} ${y} ${z}`);
     entityWrapper.append(goal);
     goalPosition = { x, y, z };
+
+    // Icosahedron (aka 20-sided die)
+    x = xArray.pop();
+    z = zArray.pop() + zOffset;
+    let ico = document.createElement('a-icosahedron')
+    ico.setAttribute('color', 'grey')
+    ico.setAttribute('radius', 0.1);
+    ico.setAttribute('position', `${x} ${y} ${z}`);
+    entityWrapper.append(ico);
+    icoPosition = { x, y, z };
+
+    // Octahedron
+    x = xArray.pop();
+    z = zArray.pop() + zOffset;
+    let octa = document.createElement('a-octahedron');
+    octa.setAttribute('color', 'grey')
+    octa.setAttribute('radius', 0.1);
+    octa.setAttribute('position', `${x} ${y} ${z}`);
+    octa.setAttribute('visible', false);
+    entityWrapper.append(octa);
+    octaPosition = { x, y, z };
     
     return new Promise(resolve => {
-        setTimeout(resolve, 1000)
+        setTimeout(resolve, animationDelay * 2)
     });
 }
 
@@ -352,5 +377,20 @@ function getViablePositions(maze, visitedMatrix, position) {
     return viablePositions;
 }
 
-main();
+async function cleanUp() {
+    goalPosition = null;
+    goalReached = false;
+    pathHistoryArray = [];
+    visitedMatrix = math.zeros(mazeWidth, mazeHeight);
+    wallWrapper.innerHTML = '';
+    wallWrapper.removeAttribute('animation__fade-out');
+    wallWrapper.removeAttribute('animation__fade-in');
+    entityWrapper.innerHTML = '';
+    
+    return new Promise(resolve => {
+        setTimeout(resolve, animationDelay)
+    });
+}
 
+renderFloorAndCeiling(mazeWidth, mazeHeight);
+main();
