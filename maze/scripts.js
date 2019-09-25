@@ -28,6 +28,7 @@ async function main() {
     console.log(maze);
     await initializeMazeEntities();
     while (!goalReached) {
+        animateRat(maze)
         await traverseMaze(maze);
     }
     await cleanUp();
@@ -121,6 +122,25 @@ function renderVerticalPlanes(arrayOfArrays) {
     })
 }
 
+async function animateRat(maze) {
+    let rat = document.querySelector('a-image#rat');
+    let ratPosition = getRatPosition();
+    let viablePositions = getViablePositionsForRat(maze, ratPosition);
+    let newPosition = _.sample(viablePositions);
+
+    rat.removeAttribute('animation');
+    rat.setAttribute('animation',`
+        property: position;
+        to: ${newPosition.x} ${newPosition.y} ${newPosition.z};
+        dur: ${animationDelay};
+        easing: linear;
+    `);
+
+    return new Promise(resolve => {
+        setTimeout(resolve, animationDelay + animationDelayBuffer)
+    })
+}
+
 async function traverseMaze(maze) {
     let cameraPosition = getCameraPosition();
     let viablePositions = getViablePositions(maze, visitedMatrix, cameraPosition);
@@ -204,7 +224,6 @@ async function traverseMaze(maze) {
 // Return sanitized coordinates by lopping off unnecessary floating decimals
 function getCameraPosition() {
     let position = camera.getAttribute('position');
-
     return {
         x: Math.round(position.x),
         y: planeHeight / 2,
@@ -212,38 +231,59 @@ function getCameraPosition() {
     }
 }
 
+function getRatPosition() {
+    let position = document.querySelector('a-image#rat').getAttribute('position');
+    return {
+        x: Math.round(position.x),
+        y: 0.125,
+        z: Math.floor(position.z) + zOffset,
+    }
+}
+
 async function initializeMazeEntities() {
-    let x, z;
+    let x, z, position;
+    let positionArray = [];
     let y = planeHeight / 2;
 
-    let xArray = [];
+    // Create array of all possible positions to prevent collisions
     for (let x = 0; x < mazeWidth; x++) {
-        xArray.push(x);
+        for (let z = 0; z < mazeHeight; z++) {
+            positionArray.push({x, z})
+        }
     }
-    xArray = _.shuffle(xArray);
-    
-    let zArray = [];
-    for (let z = 0; z < mazeHeight; z++) {
-        zArray.push(z);
-    }
-    zArray = _.shuffle(zArray);
+    positionArray = _.shuffle(positionArray);
 
     // Camera
-    x = xArray.pop();
-    z = zArray.pop() + zOffset;
+    position = positionArray.pop();
+    x = position.x;
+    z = position.z + zOffset;
     camera.setAttribute('position', `${x} ${y} ${z}`);
 
     // Goal
-    x = xArray.pop();
-    z = zArray.pop() + zOffset;
+    position = positionArray.pop();
+    x = position.x;
+    z = position.z + zOffset;
     let goal = document.createElement('a-circle');
-    goal.setAttribute('material', 'src: #smiley; shader: flat');
+    goal.setAttribute('material', 'src: #smiley; side: double; shader: flat');
     goal.setAttribute('radius', 0.2);
     goal.setAttribute('opacity', 0.5);
     goal.setAttribute('position', `${x} ${y} ${z}`);
     goal.setAttribute('look-at', '[camera]');
     entityWrapper.append(goal);
     goalPosition = { x, y, z };
+
+    // Rat
+    position = positionArray.pop();
+    x = position.x;
+    z = position.z + zOffset;
+    let rat = document.createElement('a-image');
+    rat.setAttribute('material', 'src: #rat; side: double; shader: flat');
+    rat.setAttribute('id', 'rat');
+    rat.setAttribute('width', 0.4);
+    rat.setAttribute('height', 0.25);
+    rat.setAttribute('position', `${x} 0.125 ${z}`);
+    rat.setAttribute('look-at', '[camera]')
+    entityWrapper.append(rat);
     
     return new Promise(resolve => {
         setTimeout(resolve, 1000)
@@ -299,7 +339,7 @@ function getViablePositions(maze, visitedMatrix, position) {
         {x:  1, z:  0},
         {x:  0, z: -1},
         {x:  0, z:  1},
-    ]
+    ];
 
     for (const difference of differenceArray) {
         let path = {
@@ -317,6 +357,62 @@ function getViablePositions(maze, visitedMatrix, position) {
         if (xIsInBounds && zIsInBounds) {
             unvisited = !math.subset(visitedMatrix, math.index(path.x, Math.floor(path.z)));
         }
+
+        // Check if path is blocked by a wall
+        let accessible = true;
+        if (difference.x !== 0) {
+            let index;
+            if (difference.x === -1) {
+                index = path.x + 1;
+            } else {
+                index = path.x;
+            }
+
+            let planeInTheWay = maze.verticalPlanes[path.z - zOffset][index];
+            if (planeInTheWay) {
+                accessible = false;
+            }
+        } else if (difference.z !== 0) {
+            let index;
+            if (difference.z === -1) {
+                index = path.z + zOffset;
+            } else {
+                index = path.z - zOffset;
+            }
+
+            let planeInTheWay = maze.horizontalPlanes[index][path.x];
+            if (planeInTheWay) {
+                accessible = false;
+            }
+        }
+
+        if (xIsInBounds && zIsInBounds && unvisited && accessible) {
+            viablePositions.push(path);
+        }
+    }
+
+    return viablePositions;
+}
+
+function getViablePositionsForRat(maze, position) {
+    let viablePositions = [];
+    let differenceArray = [
+        {x: -1, z:  0},
+        {x:  1, z:  0},
+        {x:  0, z: -1},
+        {x:  0, z:  1},
+    ];
+
+    for (const difference of differenceArray) {
+        let path = {
+            x: Math.round(position.x) + difference.x,
+            y: position.y,
+            z: Math.floor(position.z) + zOffset + difference.z,
+        };
+
+        // Check if path is within bounds of the maze
+        let xIsInBounds = path.x >= 0 && path.x < maze.width;
+        let zIsInBounds = path.z >= 0 && path.z < maze.height;
 
         // Check if path is blocked by a wall
         let accessible = true;
