@@ -25,6 +25,11 @@ let pipePathArray = [];
 // Ensures only one teapot has been rendered at a time
 let teaPotHasBeenRendered = false;
 
+// Palette the pipes should use
+let paletteType = 'multi-colour';
+let spongebobArray = ['#spongebob1', '#spongebob2', '#spongebob3', '#spongebob4', '#spongebob5'];
+
+
 // Roll dice to determine direction
 // possible permutations:
 // x: -/+1
@@ -39,6 +44,22 @@ const directionMatrix = [
   [0, 0, -1],
   [0, 0, 1],
 ];
+
+async function main() {
+  let numberOfPipes = _.random(minPipeCount, maxPipeCount);
+  
+  for (let i = 0; i < numberOfPipes - 1; i++) {
+    createPipePath();
+  }
+
+  for (const pipePath of pipePathArray) {
+    await drawPipe(pipePath);
+  }
+
+  await fadeOut();
+  await cleanUp();
+  main()
+}
 
 // Check if the proposedIndex is already occupied by another segment of a pipe
 function isTaken(proposedIndex) {
@@ -108,18 +129,16 @@ function createPipePath() {
 }
 
 async function drawPipe(pipePath) {
-  let h = _.random(0, 255);
-  let s = _.random(0, 50);
-  let l = _.random(20, 60);
-
-  let color =  `hsl(${h}, ${s}%, ${l}%)`;
   let globalWrapper = document.querySelector('a-entity#pipe-wrapper');
   let instanceWrapper = document.createElement('a-entity');
   globalWrapper.append(instanceWrapper);
 
+  let color =  getColor();
+  let material = getMaterial();
+
   for (let index = 0; index < pipePath.length - 1; index++) {
-    await drawSegment(pipePath, index, color, instanceWrapper);
-    maybeDrawTeapot(pipePath, index, color, instanceWrapper);
+    await drawSegment(pipePath, index, color, material, instanceWrapper);
+    maybeDrawTeapot(pipePath, index, color, material, instanceWrapper);
   }
 
   return new Promise(resolve => {
@@ -127,16 +146,36 @@ async function drawPipe(pipePath) {
   });
 }
 
-async function drawSegment(pipePath, index, color, wrapper) {
-  drawSphere(pipePath, index, color, wrapper);
-  drawCylinder(pipePath, index, color, wrapper);
+function getColor() {
+  if (paletteType === 'spongebob') {
+    return 'white';
+  } else {
+    let h = _.random(0, 255);
+    let s = _.random(0, 50);
+    let l = _.random(20, 60);
+    return `hsl(${h}, ${s}%, ${l}%)`;
+  }
+}
+
+function getMaterial() {
+  if (paletteType === 'spongebob') {
+    let src = _.sample(spongebobArray);
+    return `src: ${src}`;
+  } else {
+    return `metalness: ${metalness}`;
+  }
+}
+
+async function drawSegment(pipePath, index, color, material, wrapper) {
+  drawSphere(pipePath, index, color, material, wrapper);
+  drawCylinder(pipePath, index, color, material, wrapper);
 
   return new Promise(resolve => {
     setTimeout(resolve, pipeDrawDelay);
   });
 }
 
-function drawSphere(pipePath, index, color, wrapper) {
+function drawSphere(pipePath, index, color, material, wrapper) {
   let startingPoint = pipePath[index];
   let position = `${startingPoint[0]}, ${startingPoint[1]}, ${startingPoint[2]}`
 
@@ -144,7 +183,7 @@ function drawSphere(pipePath, index, color, wrapper) {
   sphere.setAttribute('position', position);
   sphere.setAttribute('radius', getSphereRadius(pipePath, index));
   sphere.setAttribute('color', color);
-  sphere.setAttribute('material', `metalness: ${metalness}`);
+  sphere.setAttribute('material', material);
   wrapper.append(sphere);
 
   if (index === pipePath.length - 2) {
@@ -180,7 +219,7 @@ function getSphereRadius(pipePath, index) {
   }
 }
 
-function drawCylinder(pipePath, index, color, wrapper) {
+function drawCylinder(pipePath, index, color, material, wrapper) {
   if (index === pipePath.length - 1) {
     return;
   }
@@ -205,7 +244,7 @@ function drawCylinder(pipePath, index, color, wrapper) {
   cylinder.setAttribute('rotation', rotation);
   cylinder.setAttribute('position', position);
   cylinder.setAttribute('color', color);
-  cylinder.setAttribute('material', `metalness: ${metalness}`);
+  cylinder.setAttribute('material', material);
   wrapper.append(cylinder);
 }
 
@@ -284,6 +323,27 @@ async function drawSquareArray(coordsArray) {
   });
 }
 
+function recolorPipes() {
+  let pipes = document.querySelector('a-entity#pipe-wrapper').childNodes;
+  let srcArray = ['#spongebob1', '#spongebob2', '#spongebob3', '#spongebob4', '#spongebob5']
+
+  for (const pipe of pipes) {
+    let pipeSegments = pipe.childNodes;
+    let src = _.sample(srcArray);
+    for (const pipeSegment of pipeSegments) {
+      pipeSegment.setAttribute('material', `src: ${src};`);
+      pipeSegment.setAttribute('color', 'white')
+    }
+  }
+}
+
+const paletteSelector = document.querySelector('select.palette-selector');
+
+paletteSelector.addEventListener('change', (event) => {
+  paletteType = event.target.value;
+  recolorPipes();
+});
+
 async function cleanUp() {
   let pipeWrapper = document.querySelector('a-entity#pipe-wrapper');
   let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
@@ -293,22 +353,6 @@ async function cleanUp() {
   pipePathArray = [];
   placementMatrix = math.zeros(dimension, dimension, dimension);
   teaPotHasBeenRendered = false;
-}
-
-async function main() {
-  let numberOfPipes = _.random(minPipeCount, maxPipeCount);
-  
-  for (let i = 0; i < numberOfPipes - 1; i++) {
-    createPipePath();
-  }
-
-  for (const pipePath of pipePathArray) {
-    await drawPipe(pipePath);
-  }
-
-  await fadeOut();
-  await cleanUp();
-  main()
 }
 
 main();
