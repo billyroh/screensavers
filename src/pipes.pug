@@ -13,12 +13,25 @@ head
   script( src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/6.0.2/math.min.js' )
   script( src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js' )
   script( src='https://unpkg.com/aframe-geometry-merger-component/dist/aframe-geometry-merger-component.min.js' )
+  link( href='style.css' rel='stylesheet' type='text/css' )
 body
+  .select-wrapper
+    select( class='palette-selector' )
+      option( value='default' ) Default
+      option( value='greyscale' ) Greyscale
+      option( value='rainbow' ) Rainbow
+      option( value='fairyfloss' ) Fairyfloss
+      option( value='spongebob' ) Spongebob
   .fade-out-wrapper( style='width: 100vw; height: 100vh; position: absolute; z-index: 1; pointer-events: none;' )
     svg( id='fade-out-wrapper-svg' width='1000' height='1000')
   a-scene( background='color: black' vr-mode-ui='enabled: false' )
     a-assets
       a-asset-item( id='teapot' src='./teapot.obj' )
+      img( id='spongebob1' src='./assets/spongebob1.jpg' )
+      img( id='spongebob2' src='./assets/spongebob2.jpg' )
+      img( id='spongebob3' src='./assets/spongebob3.jpg' )
+      img( id='spongebob4' src='./assets/spongebob4.jpg' )
+      img( id='spongebob5' src='./assets/spongebob5.jpg' )
     a-entity( light="type: ambient; color: #FFF" )
     a-entity( light="type: directional; color: #FFF; intensity: 1" position="-0.5 1 1" )
     a-entity( id='pipe-wrapper' position='-8 -2 -20' )
