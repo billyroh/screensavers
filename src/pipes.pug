@@ -16,7 +16,7 @@ head
 body
   .fade-out-wrapper( style='width: 100vw; height: 100vh; position: absolute; z-index: 1; pointer-events: none;' )
     svg( id='fade-out-wrapper-svg' width='1000' height='1000')
-  a-scene( background='color: black' )
+  a-scene( background='color: black' vr-mode-ui='enabled: false' )
     a-assets
       a-asset-item( id='teapot' src='./teapot.obj' )
     a-entity( light="type: ambient; color: #FFF" )
