@@ -26,7 +26,8 @@ let pipePathArray = [];
 let teaPotHasBeenRendered = false;
 
 // Palette the pipes should use
-let paletteType = 'multi-colour';
+let paletteType = 'default';
+let colorArray = getColorArray();
 let spongebobArray = ['#spongebob1', '#spongebob2', '#spongebob3', '#spongebob4', '#spongebob5'];
 
 
@@ -133,7 +134,7 @@ async function drawPipe(pipePath) {
   let instanceWrapper = document.createElement('a-entity');
   globalWrapper.append(instanceWrapper);
 
-  let color =  getColor();
+  let color =  _.sample(colorArray);
   let material = getMaterial();
 
   for (let index = 0; index < pipePath.length - 1; index++) {
@@ -146,15 +147,45 @@ async function drawPipe(pipePath) {
   });
 }
 
-function getColor() {
-  if (paletteType === 'spongebob') {
-    return 'white';
-  } else {
-    let h = _.random(0, 255);
-    let s = _.random(0, 50);
-    let l = _.random(20, 60);
-    return `hsl(${h}, ${s}%, ${l}%)`;
-  }
+function getColorArray() {
+  let colorArray = [];
+  
+  if (paletteType === 'default') {
+    let numberOfColors = _.random(8);
+    for (let i = 0; i < numberOfColors; i++) {
+      let h = _.random(0, 255);
+      let s = _.random(0, 50);
+      let l = _.random(20, 60);
+      colorArray.push(`hsl(${h}, ${s}%, ${l}%)`);
+    }
+  } else if (paletteType === 'rainbow') {
+    colorArray.push('#EB5757');
+    colorArray.push('#F2994A');
+    colorArray.push('#F2C94C');
+    colorArray.push('#219653');
+    colorArray.push('#2F80ED');
+    colorArray.push('#56CCF2');
+    colorArray.push('#9B51E0');
+  } else if (paletteType === 'greyscale') {
+    let numberOfColors = _.random(8);
+    for (let i = 0; i < numberOfColors; i++) {
+      let h = 0;
+      let s = 0;
+      let l = _.random(20, 60);
+      colorArray.push(`hsl(${h}, ${s}%, ${l}%)`);
+    }
+  } else if (paletteType === 'fairyfloss') {
+    // Pulled from https://github.com/sailorhg/fairyfloss
+    colorArray.push('#C2FFDF');
+    colorArray.push('#FFB8D1');
+    colorArray.push('#FF857F');
+    colorArray.push('#FFF352');
+    colorArray.push('#C5A3FF');
+  } else if (paletteType === 'spongebob') {
+    colorArray.push('white');
+  } 
+  
+  return colorArray;
 }
 
 function getMaterial() {
@@ -187,7 +218,7 @@ function drawSphere(pipePath, index, color, material, wrapper) {
   wrapper.append(sphere);
 
   if (index === pipePath.length - 2) {
-    drawSphere(pipePath, index + 1, color, wrapper);
+    drawSphere(pipePath, index + 1, color, material, wrapper);
   }
 }
 
@@ -248,7 +279,7 @@ function drawCylinder(pipePath, index, color, material, wrapper) {
   wrapper.append(cylinder);
 }
 
-function maybeDrawTeapot(pipePath, index, color, wrapper) {
+function maybeDrawTeapot(pipePath, index, color, material, wrapper) {
   if (teaPotHasBeenRendered) {
     return;
   }
@@ -260,7 +291,7 @@ function maybeDrawTeapot(pipePath, index, color, wrapper) {
     teapot.setAttribute('scale', '0.005 0.005 0.005');
     teapot.setAttribute('color', color);
     teapot.setAttribute('position', position);
-    teapot.setAttribute('material', `metalness: ${metalness}`);
+    teapot.setAttribute('material', material);
     wrapper.append(teapot);
     teaPotHasBeenRendered = true;
   }
@@ -325,14 +356,15 @@ async function drawSquareArray(coordsArray) {
 
 function recolorPipes() {
   let pipes = document.querySelector('a-entity#pipe-wrapper').childNodes;
-  let srcArray = ['#spongebob1', '#spongebob2', '#spongebob3', '#spongebob4', '#spongebob5']
+  colorArray = getColorArray();
 
   for (const pipe of pipes) {
     let pipeSegments = pipe.childNodes;
-    let src = _.sample(srcArray);
+    let material = getMaterial();
+    let color = _.sample(colorArray);
     for (const pipeSegment of pipeSegments) {
-      pipeSegment.setAttribute('material', `src: ${src};`);
-      pipeSegment.setAttribute('color', 'white')
+      pipeSegment.setAttribute('material', `${material}`);
+      pipeSegment.setAttribute('color', `${color}`)
     }
   }
 }
@@ -353,6 +385,7 @@ async function cleanUp() {
   pipePathArray = [];
   placementMatrix = math.zeros(dimension, dimension, dimension);
   teaPotHasBeenRendered = false;
+  colorArray = getColorArray();
 }
 
 main();
