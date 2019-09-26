@@ -19,6 +19,7 @@ const animationDelayBuffer = 10;
 let pathHistoryArray = [];
 let visitedMatrix = math.zeros(mazeWidth, mazeHeight);
 let maze;
+let ratArray = [];
 
 let goalPosition;
 let goalReached = false;
@@ -28,7 +29,7 @@ async function main() {
     await renderMaze(maze);
     await initializeMazeEntities();
     while (!goalReached) {
-        animateRat(maze)
+        animateRats();
         await traverseMaze(maze);
     }
     await cleanUp();
@@ -39,6 +40,7 @@ async function cleanUp() {
     goalPosition = null;
     goalReached = false;
     pathHistoryArray = [];
+    ratArray = [];
     visitedMatrix = math.zeros(mazeWidth, mazeHeight);
     wallWrapper.innerHTML = '';
     wallWrapper.removeAttribute('animation__fade-out');
@@ -122,23 +124,20 @@ function renderVerticalPlanes(arrayOfArrays) {
     })
 }
 
-async function animateRat(maze) {
-    let rat = document.querySelector('a-image#rat');
-    let ratPosition = getRatPosition();
-    let viablePositions = getViablePositionsForRat(maze, ratPosition);
-    let newPosition = _.sample(viablePositions);
-
-    rat.removeAttribute('animation');
-    rat.setAttribute('animation',`
-        property: position;
-        to: ${newPosition.x} ${newPosition.y} ${newPosition.z};
-        dur: ${animationDelay};
-        easing: linear;
-    `);
-
-    return new Promise(resolve => {
-        setTimeout(resolve, animationDelay + animationDelayBuffer)
-    })
+function animateRats() {
+    for (const rat of ratArray) {
+        let ratPosition = getRatPosition(rat);
+        let viablePositions = getViablePositionsForRat(maze, ratPosition);
+        let newPosition = _.sample(viablePositions);
+    
+        rat.removeAttribute('animation');
+        rat.setAttribute('animation',`
+            property: position;
+            to: ${newPosition.x} ${newPosition.y} ${newPosition.z};
+            dur: ${animationDelay};
+            easing: linear;
+        `);
+    }
 }
 
 async function traverseMaze(maze) {
@@ -231,8 +230,8 @@ function getCameraPosition() {
     }
 }
 
-function getRatPosition() {
-    let position = document.querySelector('a-image#rat').getAttribute('position');
+function getRatPosition(rat) {
+    let position = rat.getAttribute('position');
     return {
         x: Math.round(position.x),
         y: 0.125,
@@ -289,21 +288,54 @@ async function initializeMazeEntities() {
     goalPosition = { x, y, z };
 
     // Rat
-    position = positionArray.pop();
-    x = position.x;
-    z = position.z + zOffset;
+    let numberOfRats = _.random(5);
+    for (let i = 0; i < numberOfRats; i++) {
+        position = positionArray.pop();
+        x = position.x;
+        z = position.z + zOffset;
+        let rat = document.createElement('a-image');
+        rat.setAttribute('material', 'src: #rat; side: double; shader: flat');
+        rat.setAttribute('id', 'rat');
+        rat.setAttribute('width', 0.4);
+        rat.setAttribute('height', 0.25);
+        rat.setAttribute('position', `${x} 0.125 ${z}`);
+        rat.setAttribute('look-at', '[camera]')
+        ratArray.push(rat);
+        entityWrapper.append(rat);
+    }
+    updateRatCounter();
+    
+    return new Promise(resolve => {
+        setTimeout(resolve, 1000)
+    });
+}
+
+function addRat() {
     let rat = document.createElement('a-image');
+    let x = _.random(mazeWidth - 1);
+    let z = _.random(mazeWidth - 1);
     rat.setAttribute('material', 'src: #rat; side: double; shader: flat');
     rat.setAttribute('id', 'rat');
     rat.setAttribute('width', 0.4);
     rat.setAttribute('height', 0.25);
     rat.setAttribute('position', `${x} 0.125 ${z}`);
     rat.setAttribute('look-at', '[camera]')
+    ratArray.push(rat);
     entityWrapper.append(rat);
-    
-    return new Promise(resolve => {
-        setTimeout(resolve, 1000)
-    });
+    updateRatCounter();
+}
+
+function removeRat() {
+  if (ratArray.length) {
+    let rat = ratArray.pop();
+    rat.parentNode.removeChild(rat);
+    updateRatCounter();
+  }
+}
+
+function updateRatCounter() {
+  let counter = document.querySelector('div.number-of-rats');
+  counter.innerHTML = `${ratArray.length} rats`;
 }
 
 function getCameraRotation(newPosition) {
