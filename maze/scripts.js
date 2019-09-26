@@ -2,8 +2,8 @@
 // - Generate maze
 // - Render planes based on walls
 
-const mazeHeight = 3;
-const mazeWidth = 3;
+const mazeHeight = 5;
+const mazeWidth = 5;
 const zOffset = 0.5;
 const planeHeight = 0.5;
 const mazeWrapper = document.querySelector('a-entity#maze-wrapper'); // Wraps walls, floor, ceiling
@@ -26,7 +26,6 @@ let goalReached = false;
 async function main() {
     maze = generateMazeData(mazeWidth, mazeHeight);
     await renderMaze(maze);
-    console.log(maze);
     await initializeMazeEntities();
     while (!goalReached) {
         animateRat(maze)
@@ -269,8 +268,8 @@ async function initializeMazeEntities() {
     x = position.x;
     z = position.z;
     startButton.setAttribute('material', 'src: #start-button; side: double; shader: flat');
-    startButton.setAttribute('width', 0.75);
-    startButton.setAttribute('height', 0.25);
+    startButton.setAttribute('width', 0.6);
+    startButton.setAttribute('height', 0.2);
     startButton.setAttribute('opacity', 0.5);
     startButton.setAttribute('position', `${x} ${y} ${z}`);
     startButton.setAttribute('look-at', '[camera]');
