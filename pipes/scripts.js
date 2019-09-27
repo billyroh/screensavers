@@ -144,6 +144,12 @@ async function drawPipe(pipePath) {
   globalWrapper.append(instanceWrapper);
 
   currentColor = _.sample(colorArray);
+  if (!currentColor) {
+    let h = _.random(0, 255);
+    let s = _.random(0, 50);
+    let l = _.random(20, 60);
+    currentColor = `hsl(${h}, ${s}%, ${l}%)`;
+  }
   currentMaterial = getMaterial();
 
   for (let index = 0; index < pipePath.length - 1; index++) {
