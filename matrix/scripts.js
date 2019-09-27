@@ -1,4 +1,6 @@
 const svg = document.querySelector('svg');
+const animationLength = 5000;
+const animationDelay = 100;
 let corpus, palette;
 let columnIsAnimating = [];
 
@@ -19,13 +21,10 @@ function initialize() {
   let textHeight = 18;
   let numberOfColumns = Math.ceil(viewPortWidth / textWidth) + 4;
   let numberOfRows = Math.ceil(viewPortHeight / textHeight) + 4;
-  
-  let numericalCorpus = '12345678990';
-  let japaneseCorpus = '道可非常可名ジスセソタダチヂツテトナニヌネノハバパヒフヘホマミムメモ';
-  let symbolCorpus = '☺✑♡☂⋮✐☼☏⇄✏✎№Ω℞※§∜☽♀♂⚢₹☁↷☻†¤¢℅☎↻❤♨⟷¶☙µ≤'
-  corpus = numericalCorpus + japaneseCorpus;
-  palette = ['green'];
-  palette = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'purple'];
+
+  corpus = getCorpus('japanese');
+  palette = getPalette('classic');
+  // palette = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'purple'];
 
   for (let i = 0; i < numberOfColumns; i++) {
     columnIsAnimating.push(false);
@@ -46,6 +45,40 @@ function initialize() {
   }
 }
 
+function getCorpus(corpusType) {
+  let numericalCorpus = '12345678990';
+  let corpus = numericalCorpus;
+
+  if (corpusType === 'japanese') {
+    corpus += '道可非常可ジスセソタチツテトナニヌネノハヒフヘホマミムメ';
+  } else if (corpusType === 'korean') {
+    corpus += 'ㅁㄴㅇㄹㅎㅗㅓㅏㅣㅂㅈㄷㄱㅅㅆㅃㅉㄸㄲㅆㅋㅌㅊㅍㅐㅔㅠㅜㅡ'
+  } else if (corpusType === 'arabic') {
+    corpus += 'وجّهالممثلورمحمدعليرسالةإلىالرئيسعبدالفتاح';
+  } else if (corpusType === 'hebrew') {
+    corpus += 'מתרחשסביבנולצנוחלגובהכזהזובהחלטחוויה'
+  } else if (corpusType === 'wingdings') {
+    corpus += '☺✑♡☂⋮✐☼☏⇄✏✎№Ω℞※§∜☽♀♂⚢₹☁↷☻†¤¢℅☎↻❤♨⟷¶☙µ≤';
+  } else {
+    corpus += '道可非常可ジスセソタチツテトナニヌネノハヒフヘホマミムメ'; 
+  }
+
+  return corpus;
+}
+
+function getPalette(paletteType) {
+  if (paletteType === 'classic') {
+    return ['green'];
+  } else if (paletteType === 'rainbow') {
+    return ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'purple'];
+  } else if (paletteType === 'fairyfloss') {
+    // Pulled from https://github.com/sailorhg/fairyfloss
+    return ['fairyfloss1', 'fairyfloss2', 'fairyfloss3', 'fairyfloss4', 'fairyfloss5'];
+  } else {
+    return ['green'];
+  }
+}
+
 function randomize() {
   let columns = svg.childNodes;
   setInterval(() => {
@@ -60,36 +93,51 @@ function randomize() {
 }
 
 function animate() {
-  const animationLength = 5000;
-  const animationDelay = 100;
   let columns = svg.childNodes;
   setInterval(() => {
     for (let columnIndex = 0; columnIndex < columns.length; columnIndex++) {
       if (_.random(100) < 1 && !columnIsAnimating[columnIndex]) {
-        let i = 1;
-        let color = _.sample(palette);
-        let column = columns[columnIndex];
-        let numberOfRows = column.childNodes.length;
-
-        columnIsAnimating[columnIndex] = true;
-        setTimeout(() => {
-          columnIsAnimating[columnIndex] = false;
-        }, numberOfRows * (animationLength + animationDelay) + (animationDelay * 3));
-
-        for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
-          let text = column.childNodes[rowIndex];
-
-          setTimeout(() => {
-            text.setAttribute('class', color);
-          }, rowIndex * animationDelay);
-
-          setTimeout(() => {
-            text.setAttribute('class', '');
-          }, (rowIndex * animationDelay) + animationLength + animationDelay);
-        }
+        animateColumn(columns, columnIndex);
       }
     }
   }, 250);
 }
+
+async function animateColumn(columns, columnIndex) {
+  let color = _.sample(palette);
+  let column = columns[columnIndex];
+  let numberOfRows = column.childNodes.length;
+  columnIsAnimating[columnIndex] = true;
+
+  for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+    let text = column.childNodes[rowIndex];
+    await animateCell(text, color);
+  }
+
+  columnIsAnimating[columnIndex] = false;
+}
+
+async function animateCell(text, color) {
+  text.setAttribute('class', color);
+
+  setTimeout(() => {
+    text.removeAttribute('class');
+  }, animationLength + animationDelay)
+
+  return new Promise(resolve => {
+    setTimeout(resolve, animationDelay);
+  });
+}
+
+const paletteSelector = document.querySelector('select.palette-selector');
+const corpusSelector = document.querySelector('select.corpus-selector');
+
+paletteSelector.addEventListener('change', (event) => {
+  palette = getPalette(event.target.value);
+});
+
+corpusSelector.addEventListener('change', (event) => {
+  corpus = getCorpus(event.target.value);
+});
 
 main();

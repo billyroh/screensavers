@@ -2,6 +2,28 @@ body {
   background-color: black;
 }
 
+.select-wrapper {
+  position: absolute;
+  left: calc(50% - 150px);
+  bottom: 20;
+  z-index: 5;
+  text-align: center;
+  width: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: sans-serif;
+}
+
+select {
+  background: #C0C0C0;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #FFFFFF #808080 #808080 #FFFFFF;
+  height: 40px;
+  width: 150px;
+}
+
 text {
   user-select: none;
   -webkit-user-select: none;
@@ -36,6 +58,26 @@ text.indigo {
 
 text.purple {
   animation: purple 5s linear;
+}
+
+text.fairyfloss1 {
+  animation: fairyfloss1 5s linear;
+}
+
+text.fairyfloss2 {
+  animation: fairyfloss2 5s linear;
+}
+
+text.fairyfloss3 {
+  animation: fairyfloss3 5s linear;
+}
+
+text.fairyfloss4 {
+  animation: fairyfloss4 5s linear;
+}
+
+text.fairyfloss4 {
+  animation: fairyfloss5 5s linear;
 }
 
 @keyframes red {
@@ -77,5 +119,35 @@ text.purple {
 @keyframes purple {
   0% { fill: white; }
   10% { fill: #9B51E0; }
+  100% { fill: black }
+}
+
+@keyframes fairyfloss1 {
+  0% { fill: white; }
+  10% { fill: #C2FFDF; }
+  100% { fill: black }
+}
+
+@keyframes fairyfloss2 {
+  0% { fill: white; }
+  10% { fill: #FFB8D1; }
+  100% { fill: black }
+}
+
+@keyframes fairyfloss3 {
+  0% { fill: white; }
+  10% { fill: #FF857F; }
+  100% { fill: black }
+}
+
+@keyframes fairyfloss4 {
+  0% { fill: white; }
+  10% { fill: #FFF352; }
+  100% { fill: black }
+}
+
+@keyframes fairyfloss5 {
+  0% { fill: white; }
+  10% { fill: #C5A3FF; }
   100% { fill: black }
 }
