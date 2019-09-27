@@ -301,8 +301,8 @@ function maybeDrawTeapot(pipePath, index, wrapper) {
 async function fadeOut() {
   let fadeOutArray = [];
   let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
-  var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-  var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+  let width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  let height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
   svgWrapper.setAttribute('width', width);
   svgWrapper.setAttribute('height', height);

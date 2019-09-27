@@ -1,0 +1,16 @@
+text {
+  user-select: none;
+  font-family: monospace;
+  font-size: 18px;
+  text-anchor: center;
+}
+
+text.transition {
+  animation: lightUp 5s linear;
+}
+
+@keyframes lightUp {
+  0% { fill: white; }
+  10% { fill: #15C912; }
+  100% { fill: black }
+}
