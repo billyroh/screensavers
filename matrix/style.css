@@ -1,3 +1,7 @@
+body {
+  background-color: black;
+}
+
 text {
   user-select: none;
   font-family: monospace;

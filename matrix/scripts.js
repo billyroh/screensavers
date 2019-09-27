@@ -50,24 +50,29 @@ function randomize() {
         }
       }
     }
-  }, 100)
+  }, 500)
 }
 
 function animate() {
   let columns = svg.childNodes;
   setInterval(() => {
     for (const column of columns) {
-      if (_.random(100) < 1) {
+      if (_.random(100) < 5) {
         let i = 1;
         for (const text of column.childNodes) {
           setTimeout(() => {
             text.setAttribute('class', 'transition');
           }, i * 100);
+
+          setTimeout(() => {
+            text.removeAttribute('class');
+          }, (i * 100) + 5000);
+          
           i++;
         }
       }
     }
-  }, 100);
+  }, 500);
 }
 
 main();
