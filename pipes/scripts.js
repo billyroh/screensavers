@@ -146,9 +146,6 @@ async function drawPipe(pipePath) {
   currentColor = _.sample(colorArray);
   currentMaterial = getMaterial();
 
-  console.log('colorArray', colorArray);
-  console.log('currentColor', currentColor);
-
   for (let index = 0; index < pipePath.length - 1; index++) {
     await drawSegment(pipePath, index, instanceWrapper);
     maybeDrawTeapot(pipePath, index, instanceWrapper);
@@ -316,21 +313,19 @@ function maybeDrawTeapot(pipePath, index, wrapper) {
 async function fadeOut() {
   let fadeOutArray = [];
   let svgWrapper = document.querySelector('#fade-out-wrapper-svg');
-  let width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-  let height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-  svgWrapper.setAttribute('width', width);
-  svgWrapper.setAttribute('height', height);
+  svgWrapper.setAttribute('width', viewPortWidth);
+  svgWrapper.setAttribute('height', viewPortHeight);
 
-  for (let x = 0; x < Math.ceil(width / 10); x++) {
-    for (let y = 0; y < Math.ceil(height / 10); y++) {
+  for (let x = 0; x < Math.ceil(viewPortWidth / 10); x++) {
+    for (let y = 0; y < Math.ceil(viewPortHeight / 10); y++) {
       fadeOutArray.push([x, y]);
     }
   }
   fadeOutArray = _.shuffle(fadeOutArray);
 
   // Make the fade out effect proportional to the viewport's width
-  let numberofSquaresPerWave = Math.floor(width / 3);
+  let numberofSquaresPerWave = Math.floor(viewPortWidth / 3);
   let numberOfWaves = Math.floor(fadeOutArray.length / numberofSquaresPerWave);
 
   for (let i = 0; i < numberOfWaves; i++) {
