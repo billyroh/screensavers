@@ -6,7 +6,11 @@
 // - Once all pipes are rendered, fade out then restart the sequence
 
 // Global consts
-const dimension = 16;
+let viewPortWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+let viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+const width = Math.ceil(viewPortWidth / 80);
+const height = Math.ceil(viewPortHeight / 75);
+const depth = width;
 const maxPipeLength = 100;
 const minPipeCount = 5;
 const maxPipeCount = 20;
@@ -17,7 +21,7 @@ const pipeDrawDelay = 50;
 const metalness = 0.3;
 
 // Log of all the spots that are already taken up by a pipe
-let placementMatrix = math.zeros(dimension, dimension, dimension);
+let placementMatrix = math.zeros(width, height, depth);
 
 // Array that is an array of the path of a single pipe
 let pipePathArray = [];
@@ -75,7 +79,11 @@ function getValidNextIndexArray(currentIndex) {
 
   // Filter out options that are out of bounds
   nextIndexOptionArray = _.filter(nextIndexOptionArray, (nextIndex) => {
-    return !nextIndex.includes(-1) && !nextIndex.includes(dimension);
+    let withinLowerBound = !nextIndex.includes(-1);
+    let withinUpperBoundX = nextIndex[0] < width;
+    let withinUpperBoundY = nextIndex[1] < height;
+    let withinUpperBoundZ = nextIndex[2] < depth;
+    return withinLowerBound && withinUpperBoundX && withinUpperBoundY && withinUpperBoundZ;
   })
 
   // Filter out options that are already taken
@@ -94,7 +102,7 @@ function addNextIndex(pipePath, currentIndex) {
 
   // Add some randomness to length
   // Avoid excessively short arrays
-  if (_.random(100) < 2 && pipePath.length > 5) {
+  if (_.random(100) < 2 && pipePath.length > 10) {
     return pipePath;
   }
 
@@ -113,7 +121,7 @@ function addNextIndex(pipePath, currentIndex) {
 }
 
 function createInitialIndex() {
-  let currentIndex = [_.random(0, dimension - 1), _.random(0, dimension - 1), _.random(0, dimension - 1)];
+  let currentIndex = [_.random(0, width - 1), _.random(0, height - 1), _.random(0, depth - 1)];
 
   // Start from a point that is unoccupied
   if (isTaken(currentIndex)) {
@@ -137,6 +145,9 @@ async function drawPipe(pipePath) {
 
   currentColor = _.sample(colorArray);
   currentMaterial = getMaterial();
+
+  console.log('colorArray', colorArray);
+  console.log('currentColor', currentColor);
 
   for (let index = 0; index < pipePath.length - 1; index++) {
     await drawSegment(pipePath, index, instanceWrapper);
@@ -193,6 +204,10 @@ function getMaterial() {
   if (paletteType === 'spongebob') {
     let src = _.sample(spongebobArray);
     return `src: ${src}`;
+  } else if (paletteType === 'rainbow') {
+    return `metalness: ${metalness + 0.2}`;
+  } else if (paletteType === 'fairyfloss') {
+    return `metalness: ${metalness + 0.4}`;
   } else {
     return `metalness: ${metalness}`;
   }
@@ -387,9 +402,16 @@ async function cleanUp() {
   pipeWrapper.innerHTML = '';
   svgWrapper.innerHTML = '';
   pipePathArray = [];
-  placementMatrix = math.zeros(dimension, dimension, dimension);
+  placementMatrix = math.zeros(width, height, depth);
   teaPotHasBeenRendered = false;
   colorArray = getColorArray();
+}
+
+window.onresize = updateViewportSize;
+
+function updateViewportSize() {
+  viewPortWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 }
 
 main();
