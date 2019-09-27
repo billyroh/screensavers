@@ -65,14 +65,14 @@ function animate() {
           }, i * 100);
 
           setTimeout(() => {
-            text.removeAttribute('class');
+            text.setAttribute('class', '');
           }, (i * 100) + 5000);
-          
+
           i++;
         }
       }
     }
-  }, 500);
+  }, 250);
 }
 
 main();
