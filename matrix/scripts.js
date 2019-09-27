@@ -57,7 +57,7 @@ function animate() {
   let columns = svg.childNodes;
   setInterval(() => {
     for (const column of columns) {
-      if (_.random(100) < 5) {
+      if (_.random(100) < 1) {
         let i = 1;
         for (const text of column.childNodes) {
           setTimeout(() => {
