@@ -26,10 +26,11 @@ let pipePathArray = [];
 let teaPotHasBeenRendered = false;
 
 // Palette the pipes should use
-let paletteType = 'default';
+let paletteType = 'classic';
 let colorArray = getColorArray();
 let spongebobArray = ['#spongebob1', '#spongebob2', '#spongebob3', '#spongebob4', '#spongebob5'];
-
+let currentColor = _.sample(colorArray);
+let currentMaterial = getMaterial();
 
 // Roll dice to determine direction
 // possible permutations:
@@ -134,12 +135,12 @@ async function drawPipe(pipePath) {
   let instanceWrapper = document.createElement('a-entity');
   globalWrapper.append(instanceWrapper);
 
-  let color =  _.sample(colorArray);
-  let material = getMaterial();
+  currentColor = _.sample(colorArray);
+  currentMaterial = getMaterial();
 
   for (let index = 0; index < pipePath.length - 1; index++) {
-    await drawSegment(pipePath, index, color, material, instanceWrapper);
-    maybeDrawTeapot(pipePath, index, color, material, instanceWrapper);
+    await drawSegment(pipePath, index, instanceWrapper);
+    maybeDrawTeapot(pipePath, index, instanceWrapper);
   }
 
   return new Promise(resolve => {
@@ -149,8 +150,8 @@ async function drawPipe(pipePath) {
 
 function getColorArray() {
   let colorArray = [];
-  
-  if (paletteType === 'default') {
+
+  if (paletteType === 'classic') {
     let numberOfColors = _.random(8);
     for (let i = 0; i < numberOfColors; i++) {
       let h = _.random(0, 255);
@@ -183,8 +184,8 @@ function getColorArray() {
     colorArray.push('#C5A3FF');
   } else if (paletteType === 'spongebob') {
     colorArray.push('white');
-  } 
-  
+  }
+
   return colorArray;
 }
 
@@ -197,28 +198,28 @@ function getMaterial() {
   }
 }
 
-async function drawSegment(pipePath, index, color, material, wrapper) {
-  drawSphere(pipePath, index, color, material, wrapper);
-  drawCylinder(pipePath, index, color, material, wrapper);
+async function drawSegment(pipePath, index, wrapper) {
+  drawSphere(pipePath, index, wrapper);
+  drawCylinder(pipePath, index, wrapper);
 
   return new Promise(resolve => {
     setTimeout(resolve, pipeDrawDelay);
   });
 }
 
-function drawSphere(pipePath, index, color, material, wrapper) {
+function drawSphere(pipePath, index, wrapper) {
   let startingPoint = pipePath[index];
   let position = `${startingPoint[0]}, ${startingPoint[1]}, ${startingPoint[2]}`
 
   let sphere = document.createElement('a-sphere');
   sphere.setAttribute('position', position);
   sphere.setAttribute('radius', getSphereRadius(pipePath, index));
-  sphere.setAttribute('color', color);
-  sphere.setAttribute('material', material);
+  sphere.setAttribute('color', currentColor);
+  sphere.setAttribute('material', currentMaterial);
   wrapper.append(sphere);
 
   if (index === pipePath.length - 2) {
-    drawSphere(pipePath, index + 1, color, material, wrapper);
+    drawSphere(pipePath, index + 1, wrapper);
   }
 }
 
@@ -250,7 +251,7 @@ function getSphereRadius(pipePath, index) {
   }
 }
 
-function drawCylinder(pipePath, index, color, material, wrapper) {
+function drawCylinder(pipePath, index, wrapper) {
   if (index === pipePath.length - 1) {
     return;
   }
@@ -274,12 +275,12 @@ function drawCylinder(pipePath, index, color, material, wrapper) {
   cylinder.setAttribute('height', pipeHeight);
   cylinder.setAttribute('rotation', rotation);
   cylinder.setAttribute('position', position);
-  cylinder.setAttribute('color', color);
-  cylinder.setAttribute('material', material);
+  cylinder.setAttribute('color', currentColor);
+  cylinder.setAttribute('material', currentMaterial);
   wrapper.append(cylinder);
 }
 
-function maybeDrawTeapot(pipePath, index, color, material, wrapper) {
+function maybeDrawTeapot(pipePath, index, wrapper) {
   if (teaPotHasBeenRendered) {
     return;
   }
@@ -289,9 +290,9 @@ function maybeDrawTeapot(pipePath, index, color, material, wrapper) {
     let position = `${pipePath[index][0]}, ${pipePath[index][1]}, ${pipePath[index][2]}`
     teapot.setAttribute('src', '#teapot');
     teapot.setAttribute('scale', '0.005 0.005 0.005');
-    teapot.setAttribute('color', color);
+    teapot.setAttribute('color', currentColor);
     teapot.setAttribute('position', position);
-    teapot.setAttribute('material', material);
+    teapot.setAttribute('material', currentMaterial);
     wrapper.append(teapot);
     teaPotHasBeenRendered = true;
   }
@@ -357,12 +358,15 @@ async function drawSquareArray(coordsArray) {
 function recolorPipes() {
   let pipes = document.querySelector('a-entity#pipe-wrapper').childNodes;
   colorArray = getColorArray();
+  currentColor = _.sample(colorArray);
+  currentMaterial = getMaterial();
 
   for (const pipe of pipes) {
     let pipeSegments = pipe.childNodes;
     let material = getMaterial();
     let color = _.sample(colorArray);
     for (const pipeSegment of pipeSegments) {
+      pipeSegment.removeAttribute('material');
       pipeSegment.setAttribute('material', `${material}`);
       pipeSegment.setAttribute('color', `${color}`)
     }
