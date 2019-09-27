@@ -179,7 +179,7 @@ function getColorArray() {
     colorArray.push('#F2C94C');
     colorArray.push('#219653');
     colorArray.push('#2F80ED');
-    colorArray.push('#56CCF2');
+    colorArray.push('#101DB2');
     colorArray.push('#9B51E0');
   } else if (paletteType === 'greyscale') {
     let numberOfColors = _.random(8);

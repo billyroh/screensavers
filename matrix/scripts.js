@@ -1,10 +1,10 @@
 const svg = document.querySelector('svg');
-let corpus;
+let corpus, palette;
+let columnIsAnimating = [];
 
 // 1. Create columns and rows to fill the viewport
 // 2. Fill each of the cells with a character
 // 3. Iterate through each of the columns and set some speed of rain
-// 4. 
 
 function main() {
   initialize();
@@ -24,6 +24,12 @@ function initialize() {
   let japaneseCorpus = '道可非常可名ジスセソタダチヂツテトナニヌネノハバパヒフヘホマミムメモ';
   let symbolCorpus = '☺✑♡☂⋮✐☼☏⇄✏✎№Ω℞※§∜☽♀♂⚢₹☁↷☻†¤¢℅☎↻❤♨⟷¶☙µ≤'
   corpus = numericalCorpus + japaneseCorpus;
+  palette = ['green'];
+  palette = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'purple'];
+
+  for (let i = 0; i < numberOfColumns; i++) {
+    columnIsAnimating.push(false);
+  }
   
   for (let c = 0; c < numberOfColumns; c++) {
     let column = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -54,21 +60,32 @@ function randomize() {
 }
 
 function animate() {
+  const animationLength = 5000;
+  const animationDelay = 100;
   let columns = svg.childNodes;
   setInterval(() => {
-    for (const column of columns) {
-      if (_.random(100) < 1) {
+    for (let columnIndex = 0; columnIndex < columns.length; columnIndex++) {
+      if (_.random(100) < 1 && !columnIsAnimating[columnIndex]) {
         let i = 1;
-        for (const text of column.childNodes) {
+        let color = _.sample(palette);
+        let column = columns[columnIndex];
+        let numberOfRows = column.childNodes.length;
+
+        columnIsAnimating[columnIndex] = true;
+        setTimeout(() => {
+          columnIsAnimating[columnIndex] = false;
+        }, numberOfRows * (animationLength + animationDelay) + (animationDelay * 3));
+
+        for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+          let text = column.childNodes[rowIndex];
+
           setTimeout(() => {
-            text.setAttribute('class', 'transition');
-          }, i * 100);
+            text.setAttribute('class', color);
+          }, rowIndex * animationDelay);
 
           setTimeout(() => {
             text.setAttribute('class', '');
-          }, (i * 100) + 5000);
-
-          i++;
+          }, (rowIndex * animationDelay) + animationLength + animationDelay);
         }
       }
     }

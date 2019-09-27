@@ -4,17 +4,78 @@ body {
 
 text {
   user-select: none;
+  -webkit-user-select: none;
   font-family: monospace;
   font-size: 18px;
   text-anchor: center;
 }
 
-text.transition {
-  animation: lightUp 5s linear;
+text.red {
+  animation: red 5s linear;
 }
 
-@keyframes lightUp {
+text.orange {
+  animation: orange 5s linear;
+}
+
+text.yellow {
+  animation: yellow 5s linear;
+}
+
+text.green {
+  animation: green 5s linear;
+}
+
+text.blue {
+  animation: blue 5s linear;
+}
+
+text.indigo {
+  animation: indigo 5s linear;
+}
+
+text.purple {
+  animation: purple 5s linear;
+}
+
+@keyframes red {
+  0% { fill: white; }
+  10% { fill: #EB5757; }
+  100% { fill: black }
+}
+
+@keyframes orange {
+  0% { fill: white; }
+  10% { fill: #F2994A; }
+  100% { fill: black }
+}
+
+@keyframes yellow {
+  0% { fill: white; }
+  10% { fill: #F2C94C; }
+  100% { fill: black }
+}
+
+@keyframes green {
   0% { fill: white; }
   10% { fill: #15C912; }
+  100% { fill: black }
+}
+
+@keyframes blue {
+  0% { fill: white; }
+  10% { fill: #2F80ED; }
+  100% { fill: black }
+}
+
+@keyframes indigo {
+  0% { fill: white; }
+  10% { fill: #101db2; }
+  100% { fill: black }
+}
+
+@keyframes purple {
+  0% { fill: white; }
+  10% { fill: #9B51E0; }
   100% { fill: black }
 }
