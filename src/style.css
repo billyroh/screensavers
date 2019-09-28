@@ -1,3 +1,14 @@
 body {
   font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  padding: 40px 0;
+}
+
+section {
+  margin: 0 auto;
+  max-width: 920px;
+}
+
+a {
+  color: blue;
 }
