@@ -11,5 +11,16 @@ head
   meta( property='og:image:height' content='630' )
   script( src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js' )
 body
+  .select-wrapper
+    select( class='palette-selector' )
+      option( value='classic' ) Classic
+      option( value='rainbow' ) Rainbow
+      option( value='pastel' ) Pastel
+    select( class='corpus-selector' )
+      option( value='japanese' ) Japanese
+      option( value='korean' ) Korean
+      option( value='arabic' ) Arabic
+      option( value='hebrew' ) Hebrew
+      option( value='wingdings' ) Wingdings
   svg( style='background-color: black; width: 100vw; height: 100vh' )
   script( src='scripts.js' )
