@@ -60,24 +60,20 @@ text.purple {
   animation: purple 5s linear;
 }
 
-text.fairyfloss1 {
-  animation: fairyfloss1 5s linear;
+text.pastel1 {
+  animation: pastel1 5s linear;
 }
 
-text.fairyfloss2 {
-  animation: fairyfloss2 5s linear;
+text.pastel2 {
+  animation: pastel2 5s linear;
 }
 
-text.fairyfloss3 {
-  animation: fairyfloss3 5s linear;
+text.pastel3 {
+  animation: pastel3 5s linear;
 }
 
-text.fairyfloss4 {
-  animation: fairyfloss4 5s linear;
-}
-
-text.fairyfloss4 {
-  animation: fairyfloss5 5s linear;
+text.pastel4 {
+  animation: pastel4 5s linear;
 }
 
 @keyframes red {
@@ -122,32 +118,26 @@ text.fairyfloss4 {
   100% { fill: black }
 }
 
-@keyframes fairyfloss1 {
+@keyframes pastel1 {
   0% { fill: white; }
-  10% { fill: #C2FFDF; }
+  10% { fill: #ffb6b9; }
   100% { fill: black }
 }
 
-@keyframes fairyfloss2 {
+@keyframes pastel2 {
   0% { fill: white; }
-  10% { fill: #FFB8D1; }
+  10% { fill: #fae3d9; }
   100% { fill: black }
 }
 
-@keyframes fairyfloss3 {
+@keyframes pastel3 {
   0% { fill: white; }
-  10% { fill: #FF857F; }
+  10% { fill: #bbded6; }
   100% { fill: black }
 }
 
-@keyframes fairyfloss4 {
+@keyframes pastel4 {
   0% { fill: white; }
-  10% { fill: #FFF352; }
-  100% { fill: black }
-}
-
-@keyframes fairyfloss5 {
-  0% { fill: white; }
-  10% { fill: #C5A3FF; }
+  10% { fill: #8ac6d1; }
   100% { fill: black }
 }

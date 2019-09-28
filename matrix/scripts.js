@@ -71,9 +71,8 @@ function getPalette(paletteType) {
     return ['green'];
   } else if (paletteType === 'rainbow') {
     return ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'purple'];
-  } else if (paletteType === 'fairyfloss') {
-    // Pulled from https://github.com/sailorhg/fairyfloss
-    return ['fairyfloss1', 'fairyfloss2', 'fairyfloss3', 'fairyfloss4', 'fairyfloss5'];
+  } else if (paletteType === 'pastel') {
+    return ['pastel1', 'pastel2', 'pastel3', 'pastel4'];
   } else {
     return ['green'];
   }

@@ -174,13 +174,15 @@ function getColorArray() {
       colorArray.push(`hsl(${h}, ${s}%, ${l}%)`);
     }
   } else if (paletteType === 'rainbow') {
-    colorArray.push('#EB5757');
-    colorArray.push('#F2994A');
-    colorArray.push('#F2C94C');
-    colorArray.push('#219653');
-    colorArray.push('#2F80ED');
-    colorArray.push('#101DB2');
-    colorArray.push('#9B51E0');
+    colorArray = [
+      '#EB5757',
+      '#F2994A',
+      '#F2C94C',
+      '#219653',
+      '#2F80ED',
+      '#101DB2',
+      '#9B51E0',
+    ];
   } else if (paletteType === 'greyscale') {
     let numberOfColors = _.random(8);
     for (let i = 0; i < numberOfColors; i++) {
@@ -189,13 +191,13 @@ function getColorArray() {
       let l = _.random(20, 60);
       colorArray.push(`hsl(${h}, ${s}%, ${l}%)`);
     }
-  } else if (paletteType === 'fairyfloss') {
-    // Pulled from https://github.com/sailorhg/fairyfloss
-    colorArray.push('#C2FFDF');
-    colorArray.push('#FFB8D1');
-    colorArray.push('#FF857F');
-    colorArray.push('#FFF352');
-    colorArray.push('#C5A3FF');
+  } else if (paletteType === 'pastel') {
+    colorArray = [
+      '#ffb6b9',
+      '#fae3d9',
+      '#bbded6',
+      '#8ac6d1',
+    ]
   } else if (paletteType === 'spongebob') {
     colorArray.push('white');
   }
@@ -209,7 +211,7 @@ function getMaterial() {
     return `src: ${src}`;
   } else if (paletteType === 'rainbow') {
     return `metalness: ${metalness + 0.2}`;
-  } else if (paletteType === 'fairyfloss') {
+  } else if (paletteType === 'pastel') {
     return `metalness: ${metalness + 0.4}`;
   } else {
     return `metalness: ${metalness}`;
