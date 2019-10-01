@@ -11,7 +11,8 @@ let viewPortHeight = Math.max(document.documentElement.clientHeight, window.inne
 const width = Math.ceil(viewPortWidth / 80);
 const height = Math.ceil(viewPortHeight / 75);
 const depth = width;
-const maxPipeLength = 100;
+const maxPipeLength = 200;
+const minPipeLength = 20;
 const minPipeCount = 5;
 const maxPipeCount = 20;
 const pipeRadius = 0.1;
@@ -102,7 +103,7 @@ function addNextIndex(pipePath, currentIndex) {
 
   // Add some randomness to length
   // Avoid excessively short arrays
-  if (_.random(100) < 2 && pipePath.length > 10) {
+  if (_.random(100) < 2 && pipePath.length > minPipeLength) {
     return pipePath;
   }
 
@@ -166,7 +167,7 @@ function getColorArray() {
   let colorArray = [];
 
   if (paletteType === 'classic') {
-    let numberOfColors = _.random(8);
+    let numberOfColors = _.random(1, 4);
     for (let i = 0; i < numberOfColors; i++) {
       let h = _.random(0, 255);
       let s = _.random(0, 50);
