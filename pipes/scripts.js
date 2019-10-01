@@ -357,7 +357,6 @@ async function drawSquareArray(coordsArray) {
   let pathString = '';
 
   for (const coords of coordsArray) {
-    // drawSquare(coords[0], coords[1]);
     let vertex1 = `M ${coords[0] * height} ${coords[1] * height}`;
     let vertex2 = `H ${(coords[0] * height) + height}`;
     let vertex3 = `V ${(coords[1] * height) + height}`;

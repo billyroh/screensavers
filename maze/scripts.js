@@ -1,7 +1,3 @@
-// Overall structure
-// - Generate maze
-// - Render planes based on walls
-
 const mazeHeight = 5;
 const mazeWidth = 5;
 const zOffset = 0.5;
@@ -66,13 +62,6 @@ async function renderMaze(maze) {
     return new Promise(resolve => {
         setTimeout(resolve, 0)
     });
-
-    // Rules
-    // - Display start button at the star
-    // - Encountering smiley face resets
-    // - Encountering 20-sided dice thing flips floor to ceiling
-    // - Encountering triangular prism flips it again
-    // plus add in renderRat, renderSmileyFace, etc.
 }
 
 async function renderWalls(maze) {
@@ -202,22 +191,6 @@ async function traverseMaze(maze) {
     return new Promise(resolve => {
         setTimeout(resolve, animationDelay + animationDelayBuffer)
     })
-
-    // 1. Randomly place camera in maze
-    // 2. Keep track of path in pathHistoryArray
-    // 3. Keep track of path in unexploredPathArray, where at least one of the four sides is both:
-    //   - Not blocked by a plane AND
-    //   - Not already accessed before
-    // 4. Add current position to pathHistoryArray and unexploredPathArray
-    // 5. Randomly pick an adjacent coordinate that is accessible
-    // 6. Add that coordinate to pathHistoryArray and unexploredPathArray
-    // 7. Keep looping until you reach a dead end
-    // 8. Retrace steps using pathHistoryArray, until you're at a position contained within unexploredPathArray
-    // 
-    // Keep in mind that when you encounter one of the following, you reset pathHistoryArray and unexploredPathArray
-    // - Smiley: Reset the entire maze
-    // - Dice: Flip
-    // - Prism: Flip
 }
 
 // Return sanitized coordinates by lopping off unnecessary floating decimals
