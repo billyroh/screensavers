@@ -25,13 +25,17 @@ body {
   padding: 0px;
 }
 
+body::-webkit-scrollbar {
+  width: 0;
+}
+
 img.header {
   width: 100%;
   margin-bottom: 40px;
 }
 
 section {
-  padding: 40px 0;
+  padding: 52px 0;
   margin: 0 auto;
   max-width: 640px;
 }
@@ -99,10 +103,12 @@ span.action-underline {
   width: 100%;
   background: #C0C0C0;
   box-shadow:
-    inset 0px 1px 0px #DFDFDF,
+    inset -1px 0px 0px #FFFFFF,
     inset 0px -1px 0px #727272,
     inset 1px 0px 0px #FFFFFF,
-    inset -1px 0px 0px #FFFFFF;
+    inset 0px 1px 0px #000000,
+    inset 0px 2px 0px #DFDFDF,
+  ;
   position: fixed;
   bottom: 0;
 }
@@ -110,14 +116,11 @@ span.action-underline {
 .viewport {
   margin-top: 62px;
   margin-bottom: 30px;
-  padding: 50px;
+  padding: 24px;
   box-shadow:
     inset -1px 0px 0px #000000,
     inset -2px 0px 0px #808080,
     inset -4px 0px 0px #C0C0C0,
-
-    inset -6px -2px 0px #FFFFFF,
-    inset -7px -3px 0px #DFDFDF,
 
     inset 1px 0px 0px #DFDFDF,
     inset 2px 0px 0px #FFFFFF,
@@ -127,4 +130,16 @@ span.action-underline {
     inset 6px 0px 0px #000000,
     
   ;
+}
+
+@media only screen and (max-device-width: 520px) {
+  .viewport {
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+
+  .menu-bar,
+  .top-bar-wrapper {
+    position: static;
+  }
 }
