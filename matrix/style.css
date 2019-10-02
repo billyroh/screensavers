@@ -22,6 +22,8 @@ select {
   border-color: #FFFFFF #808080 #808080 #FFFFFF;
   height: 40px;
   width: 150px;
+  margin-left: 12px;
+  margin-right: 12px;
 }
 
 text {
