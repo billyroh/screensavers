@@ -1,13 +1,78 @@
+:root {
+  --box-shadow:
+    inset -1px 0px 0px #000000,
+    inset -2px 0px 0px #808080,
+    inset -4px 0px 0px #C0C0C0,
+    inset 1px 1px 0px #DFDFDF,
+    inset 2px 2px 0px #FFFFFF,
+    inset 4px 4px 0px #C0C0C0, ; }
+
+@font-face {
+  font-family: "fs-tahoma";
+  src: url("./assets/fs-tahoma-8px.ttf"); }
+* {
+  box-sizing: border-box; }
+
 body {
   font-family: 'Arial', sans-serif;
   font-size: 16px;
-  padding: 40px 0; }
+  line-height: 1.45;
+  padding: 0px; }
+
+img.header {
+  width: 100%;
+  margin-bottom: 40px; }
 
 section {
+  padding: 40px 0;
   margin: 0 auto;
-  max-width: 920px; }
+  max-width: 640px; }
 
 a {
   color: blue; }
+
+.blue-bar,
+.action-bar,
+.menu-bar {
+  font-family: 'fs-tahoma', 'Arial', sans-serif;
+  font-size: 18px; }
+
+.blue-bar {
+  height: 30px;
+  width: 100vw;
+  background: #06157F;
+  box-shadow: inset -1px 0px 0px #000000, inset -2px 0px 0px #808080, inset -4px 0px 0px #C0C0C0, inset 1px 1px 0px #DFDFDF, inset 2px 2px 0px #FFFFFF, inset 4px 4px 0px #C0C0C0; }
+
+.action-bar {
+  height: 32px;
+  width: 100vw;
+  background: #C0C0C0;
+  box-shadow: inset -1px 0px 0px #000000, inset -2px 0px 0px #808080, inset -4px 0px 0px #C0C0C0, inset 1px 0px 0px #DFDFDF, inset 2px 0px 0px #FFFFFF, inset 4px 4px 0px #C0C0C0, inset 0px -1px 0px #000000, inset 0px -2px 0px #808080;
+  display: flex;
+  padding: 2px 16px; }
+
+.action {
+  margin-right: 12px; }
+
+span.action-underline {
+  text-decoration: underline; }
+
+.top-bar-wrapper {
+  position: fixed;
+  top: 0; }
+
+.menu-bar {
+  height: 30px;
+  width: 100%;
+  background: #C0C0C0;
+  box-shadow: inset 0px 1px 0px #DFDFDF, inset 0px -1px 0px #727272, inset 1px 0px 0px #FFFFFF, inset -1px 0px 0px #FFFFFF;
+  position: fixed;
+  bottom: 0; }
+
+.viewport {
+  margin-top: 62px;
+  margin-bottom: 30px;
+  padding: 50px;
+  box-shadow: inset -1px 0px 0px #000000, inset -2px 0px 0px #808080, inset -4px 0px 0px #C0C0C0, inset -6px -2px 0px #FFFFFF, inset -7px -3px 0px #DFDFDF, inset 1px 0px 0px #DFDFDF, inset 2px 0px 0px #FFFFFF, inset 4px 0px 0px #C0C0C0, inset 5px 0px 0px #808080, inset 6px 0px 0px #000000; }
 
 /*# sourceMappingURL=style.css.map */

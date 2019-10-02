@@ -10,19 +10,33 @@ head
   meta( property='og:image:width' content='1200' )
   meta( property='og:image:height' content='630' )
 body
-  section
-    h1 Reviving the Dream of the 90s
-    p Recreation of the 90s aesthetic with modern web technology.
-    p Special thanks to Visnu Pitiyanuvath for all his help with this.
-    br
-    br
-    a( href='pipes' ) Pipes
-    p Recreated using A-Frame, Math.js, await/async, SVG paths
-    br
-    br
-    a( href='maze' ) Maze
-    p Recreated using using A-Frame, Math.js, await/async
-    br
-    br
-    a( href='matrix' ) Matrix
-    p Recreated using SVG, await/async, CSS animation keyframes
+  .top-bar-wrapper
+    .blue-bar
+    .action-bar
+      .action
+        span.action-underline F
+        | ile
+      .action
+        span.action-underline E
+        | dit
+      .action
+        span.action-underline V
+        | iew
+  .viewport: .viewport-inner
+    section
+      img.header( src='./assets/header.png' )
+      p The 90s were an exuberant time for technology. This is an attempt to bring back some of energy by recreating screensavers with WebGL and other modern web technologies.
+      p
+        | Special thanks to&nbsp;
+        a( href='https://twitter.com/visnup' ) Visnu Pitiyanuvath
+      a( href='pipes' ) Pipes
+      p Recreated using A-Frame, Math.js, await/async, SVG paths
+      br
+      br
+      a( href='maze' ) Maze
+      p Recreated using using A-Frame, Math.js, await/async
+      br
+      br
+      a( href='matrix' ) Matrix
+      p Recreated using SVG, await/async, CSS animation keyframes
+  .menu-bar
