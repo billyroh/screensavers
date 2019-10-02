@@ -257,7 +257,7 @@ async function initializeMazeEntities() {
     goal.setAttribute('opacity', 0.5);
     goal.setAttribute('position', `${x} ${y} ${z}`);
     goal.setAttribute('look-at', '[camera]');
-    wallWrapper.append(goal);
+    entityWrapper.append(goal);
     goalPosition = { x, y, z };
 
     // Rat
