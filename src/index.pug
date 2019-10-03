@@ -12,12 +12,14 @@ head
 body
   .top-bar-wrapper
     .blue-bar
-      .icon
-      .title Reviving the Dream of the 90s in WebGL
-      .blue-bar-buttons
-        .minimize
-        .maximize
-        .close
+      .left-content
+        .icon.app-icon
+          img( src='./assets/paint-brush.ico' )
+        .title Reviving the Dream of the 90s in WebGL
+      .right-content.blue-bar-buttons
+        .button: .icon: img( src='./assets/minimize.svg' )
+        .button: .icon: img( src='./assets/maximize.svg' )
+        .button: .icon: img( src='./assets/close.svg' )
     .action-bar
       .action
         span.action-underline F
@@ -35,6 +37,7 @@ body
       p
         | Special thanks to&nbsp;
         a( href='https://twitter.com/visnup' ) Visnu Pitiyanuvath
+        | &nbsp;for all his help with this.
       a( href='pipes' ) Pipes
       p Recreated using A-Frame, Math.js, await/async, SVG paths
       br
@@ -45,4 +48,9 @@ body
       br
       a( href='matrix' ) Matrix
       p Recreated using SVG, await/async, CSS animation keyframes
-  .menu-bar
+  .bottom-bar-wrapper
+    .menu-bar-delineator
+    .menu-bar
+      .start-button.button
+        .icon
+        | Start
