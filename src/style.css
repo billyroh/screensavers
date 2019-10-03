@@ -1,14 +1,265 @@
+@font-face {
+  font-family: "MSSansSerif";
+  src: url("./assets/MSSansSerif.ttf");
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Arial', sans-serif;
   font-size: 16px;
-  padding: 40px 0;
+  line-height: 1.45;
+  padding: 0px;
+}
+
+body::-webkit-scrollbar {
+  width: 0;
+}
+
+img.header {
+  width: 100%;
+  margin-bottom: 40px;
 }
 
 section {
+  padding: 52px 0;
   margin: 0 auto;
-  max-width: 920px;
+  max-width: 640px;
 }
 
 a {
   color: blue;
+}
+
+video {
+  width: 100%;
+}
+
+.blue-bar,
+.action-bar,
+.menu-bar {
+  font-family: 'MSSansSerif', 'Arial', sans-serif;
+  font-size: 12px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.blue-bar {
+  height: 30px;
+  width: 100vw;
+  background: #06157F;
+  color: #FFFFFF;
+  padding: 3px 5px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  box-shadow:
+    inset -1px 0px 0px #000000,
+    inset -2px 0px 0px #808080,
+    inset -3px 0px 0px #C0C0C0,
+    inset 1px 1px 0px #DFDFDF,
+    inset 2px 2px 0px #FFFFFF,
+    inset 3px 3px 0px #C0C0C0,
+  ;
+}
+
+.blue-bar .title {
+  display: flex;
+  align-items: center;
+}
+
+.blue-bar .left-content,
+.blue-bar .right-content {
+  display: flex;
+}
+
+.blue-bar-buttons {
+  padding-top: 5px;
+  padding-right: 5px;
+}
+
+.blue-bar .app-icon {
+  width: 12px;
+  margin: 7px 7px 0 6px;
+}
+
+.blue-bar-buttons .icon {
+  width: 10px;
+}
+
+.blue-bar-buttons .button {
+  padding: 4px;
+  margin-left: 5px;
+  width: 18px;
+  height: 18px;
+}
+
+.icon img {
+  width: 100%;
+}
+
+.action-bar {
+  height: 28px;
+  width: 100vw;
+  background: #C0C0C0;
+  box-shadow:
+    inset -1px 0px 0px #000000,
+    inset -2px 0px 0px #808080,
+    inset -3px 0px 0px #C0C0C0,
+    inset 1px 0px 0px #DFDFDF,
+    inset 2px 0px 0px #FFFFFF,
+    inset 3px 3px 0px #C0C0C0,
+
+    inset 0px -1px 0px #000000,
+    inset 0px -2px 0px #808080,
+  ;
+
+  display: flex;
+  padding: 0px 16px;
+}
+
+.action {
+  margin-top: -1px;
+  margin-right: 12px;
+  align-items: center;
+  display: flex;
+}
+
+span.action-underline {
+  text-decoration: underline;
+}
+
+.top-bar-wrapper {
+  position: fixed;
+  top: 0;
+}
+
+.bottom-bar-wrapper {
+  position: fixed;
+  bottom: 0;
+}
+
+.menu-bar {
+  height: 30px;
+  width: 100vw;
+  background: #C0C0C0;
+  padding: 2px;
+  display: flex;
+  justify-content: space-between;
+  box-shadow:
+    inset 0px 1px 0px #C0C0C0,
+    inset 0px 2px 0px #DFDFDF,
+  ;
+}
+
+.menu-bar-delineator {
+  height: 3px;
+  width: calc(100vw - 2px);
+  box-shadow:
+    inset 0px 1px 0px #C0C0C0,
+    inset 0px 2px 0px #808080,
+    inset 0px 3px 0px #000000,
+  ;
+}
+
+.start-button {
+  padding: 0 5px;
+  height: 26px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.start-button .icon {
+  width: 16px;
+  margin-right: 3px;
+}
+
+.time {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  box-shadow:
+    inset 1px 1px 0px #808080,
+    inset -1px -1px 0px #FFFFFF,
+  ;
+}
+
+.menu-bar .left-content,
+.menu-bar .right-content {
+  display: flex;
+}
+
+.viewport {
+  margin-top: 58px;
+  margin-bottom: 30px;
+  padding: 24px;
+  width: 100%;
+  box-shadow:
+    inset -1px 0px 0px #000000,
+    inset -2px 0px 0px #808080,
+    inset -3px 0px 0px #C0C0C0,
+
+    inset 1px 0px 0px #DFDFDF,
+    inset 2px 0px 0px #FFFFFF,
+    inset 3px 0px 0px #C0C0C0,
+
+    inset 4px 0px 0px #808080,
+    inset 5px 0px 0px #000000,
+    
+  ;
+}
+
+.button {
+  background: #C0C0C0;
+  box-shadow:
+  inset 1px 1px 0px #FFFFFF,
+    inset 2px 2px 0px #DFDFDF,
+    inset -1px -1px 0px #000000,
+    inset -2px -2px 0px #808080,
+  ;
+}
+
+a.button {
+  text-decoration: none;
+  color: #000000;
+  padding: 6px 16px;
+}
+
+a.button + a.button {
+  margin-left: 5px;
+}
+
+.section-button-wrapper {
+  margin-top: 40px;
+  display: flex;
+}
+
+@media (max-width: 720px) {
+  .menu-bar,
+  .blue-bar,
+  .action-bar {
+    width: auto;
+  }
+
+  .viewport {
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+
+  .top-bar-wrapper,
+  .bottom-bar-wrapper {
+    position: static;
+  }
+}
+
+@media (max-width: 320px) {
+  .blue-bar .left-content .title {
+    width: 160px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 }

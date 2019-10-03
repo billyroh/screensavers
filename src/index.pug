@@ -10,19 +10,52 @@ head
   meta( property='og:image:width' content='1200' )
   meta( property='og:image:height' content='630' )
 body
-  section
-    h1 Reviving the Dream of the 90s
-    p Recreation of the 90s aesthetic with modern web technology.
-    p Special thanks to Visnu Pitiyanuvath for all his help with this.
-    br
-    br
-    a( href='pipes' ) Pipes
-    p Recreated using A-Frame, Math.js, await/async, SVG paths
-    br
-    br
-    a( href='maze' ) Maze
-    p Recreated using using A-Frame, Math.js, await/async
-    br
-    br
-    a( href='matrix' ) Matrix
-    p Recreated using SVG, await/async, CSS animation keyframes
+  .top-bar-wrapper
+    .blue-bar
+      .left-content
+        .icon.app-icon
+          img( src='./assets/paint-brush.ico' )
+        .title Reviving the Dream of the 90s in WebGL
+      .right-content.blue-bar-buttons
+        .button: .icon: img( src='./assets/minimize.svg' )
+        .button: .icon: img( src='./assets/maximize.svg' )
+        .button: .icon: img( src='./assets/close.svg' )
+    .action-bar
+      .action
+        span.action-underline F
+        | ile
+      .action
+        span.action-underline E
+        | dit
+      .action
+        span.action-underline V
+        | iew
+  .viewport
+    section
+      img.header( src='./assets/header.png' )
+      p The 90s were an exuberant time for technology. This is an attempt to bring back some of that energy by recreating screensavers with WebGL and other modern web technologies.
+      p
+        | Special thanks to&nbsp;
+        a( href='https://twitter.com/visnup' ) Visnu Pitiyanuvath
+        | &nbsp;for all his help with this.
+      .section-button-wrapper
+        a.button( href='' ) View Source
+        a.button( href='' ) See Slides
+    section
+      a( href='./pipes' ): video( src='./assets/pipes.mp4' autoplay loop muted playsinline )
+    section
+      a( href='./maze' ): video( src='./assets/maze.mp4' autoplay loop muted playsinline )
+    section
+      a( href='./materix' ): video( src='./assets/matrix.mp4' autoplay loop muted playsinline )
+  .bottom-bar-wrapper
+    .menu-bar-delineator
+    .menu-bar
+      .left-content
+        .start-button.button
+          .icon: img( src='./assets/windows-logo.ico' )
+          | Start
+        .menu-bar-item
+          | Reviving the Drea...
+      .right-content
+        .time
+          | 9:42 AM
