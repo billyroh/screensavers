@@ -147,6 +147,7 @@ span.action-underline {
   background: #C0C0C0;
   padding: 2px;
   display: flex;
+  justify-content: space-between;
   box-shadow:
     inset 0px 1px 0px #C0C0C0,
     inset 0px 2px 0px #DFDFDF,
@@ -174,6 +175,21 @@ span.action-underline {
 .start-button .icon {
   width: 16px;
   margin-right: 3px;
+}
+
+.time {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  box-shadow:
+    inset 1px 1px 0px #808080,
+    inset -1px -1px 0px #FFFFFF,
+  ;
+}
+
+.menu-bar .left-content,
+.menu-bar .right-content {
+  display: flex;
 }
 
 .viewport {
