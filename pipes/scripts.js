@@ -54,6 +54,9 @@ const directionMatrix = [
 
 async function main() {
   let numberOfPipes = _.random(minPipeCount, maxPipeCount);
+
+  let pipeWrapper = document.querySelector('#pipe-wrapper');
+  pipeWrapper.setAttribute('position', `${Math.floor(width / -2)} -2 ${depth * -1 - 2}`);
   
   for (let i = 0; i < numberOfPipes - 1; i++) {
     createPipePath();
