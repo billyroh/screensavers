@@ -196,7 +196,8 @@ a.button + a.button {
   .bottom-bar-wrapper {
     position: static; }
 
-  .blue-bar .left-content .title {
+  .blue-bar .left-content .title,
+  .menu-bar-item-text {
     margin-top: 2px; } }
 @media (max-width: 320px) {
   .blue-bar .left-content .title {

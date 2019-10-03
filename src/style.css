@@ -287,7 +287,8 @@ a.button + a.button {
     position: static;
   }
 
-  .blue-bar .left-content .title {
+  .blue-bar .left-content .title,
+  .menu-bar-item-text {
     margin-top: 2px;
   }
 }
