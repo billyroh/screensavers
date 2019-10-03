@@ -8,7 +8,7 @@
 // Global consts
 let viewPortWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
 let viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-const width = Math.ceil(viewPortWidth / 80);
+const width = Math.ceil(viewPortWidth / 60);
 const height = Math.ceil(viewPortHeight / 75);
 const depth = width;
 const maxPipeLength = 200;
@@ -56,7 +56,7 @@ async function main() {
   let numberOfPipes = _.random(minPipeCount, maxPipeCount);
 
   let pipeWrapper = document.querySelector('#pipe-wrapper');
-  pipeWrapper.setAttribute('position', `${Math.floor(width / -2)} -2 ${depth * -1 - 2}`);
+  pipeWrapper.setAttribute('position', `${Math.floor(width / -2)} -2 ${depth * -1 - 4}`);
   
   for (let i = 0; i < numberOfPipes - 1; i++) {
     createPipePath();
