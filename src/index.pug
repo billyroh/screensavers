@@ -38,16 +38,15 @@ body
         | Special thanks to&nbsp;
         a( href='https://twitter.com/visnup' ) Visnu Pitiyanuvath
         | &nbsp;for all his help with this.
-      a( href='pipes' ) Pipes
-      p Recreated using A-Frame, Math.js, await/async, SVG paths
-      br
-      br
-      a( href='maze' ) Maze
-      p Recreated using using A-Frame, Math.js, await/async
-      br
-      br
-      a( href='matrix' ) Matrix
-      p Recreated using SVG, await/async, CSS animation keyframes
+      .section-button-wrapper
+        a.button( href='' ) View Source
+        a.button( href='' ) See Slides
+    section
+      a( href='./pipes' ): video( src='./assets/pipes.mp4' autoplay loop muted playsinline )
+    section
+      a( href='./maze' ): video( src='./assets/maze.mp4' autoplay loop muted playsinline )
+    section
+      a( href='./materix' ): video( src='./assets/matrix.mp4' autoplay loop muted playsinline )
   .bottom-bar-wrapper
     .menu-bar-delineator
     .menu-bar
