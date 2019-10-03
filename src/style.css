@@ -177,6 +177,35 @@ span.action-underline {
   margin-right: 3px;
 }
 
+.menu-bar-item {
+  padding: 0 12px;
+  height: 26px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  margin-left: 5px;
+  width: 160px;
+  background-image: url('./assets/texture.jpg');
+  box-shadow:
+    inset 1px 1px 0px #000000,
+    inset 2px 2px 0px #808080,
+    inset -2px -2px 0px #DFDFDF,
+    inset -1px -1px 0px #FFFFFF,
+  ;
+}
+
+.menu-bar-item .icon {
+  width: 16px;
+  margin-right: 5px;
+}
+
+.menu-bar-item-text {
+  width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .time {
   display: flex;
   align-items: center;

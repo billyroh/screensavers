@@ -46,16 +46,17 @@ body
     section
       a( href='./maze' ): video( src='./assets/maze.mp4' autoplay loop muted playsinline )
     section
-      a( href='./materix' ): video( src='./assets/matrix.mp4' autoplay loop muted playsinline )
+      a( href='./matrix' ): video( src='./assets/matrix.mp4' autoplay loop muted playsinline )
   .bottom-bar-wrapper
     .menu-bar-delineator
     .menu-bar
       .left-content
         .start-button.button
           .icon: img( src='./assets/windows-logo.ico' )
-          | Start
+          span Start
         .menu-bar-item
-          | Reviving the Drea...
+          .icon: img( src='./assets/paint-brush.ico' )
+          span.menu-bar-item-text Reviving the Dream of the 90s in WebGL
       .right-content
         .time
-          | 9:42 AM
+  script( src='scripts.js' )
