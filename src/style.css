@@ -282,6 +282,10 @@ a.button + a.button {
   .bottom-bar-wrapper {
     position: static;
   }
+
+  .blue-bar .left-content .title {
+    margin-top: 2px;
+  }
 }
 
 @media (max-width: 320px) {
