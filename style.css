@@ -1,6 +1,6 @@
 @font-face {
-  font-family: "fs-tahoma";
-  src: url("./assets/fs-tahoma-8px.ttf"); }
+  font-family: "MSSansSerif";
+  src: url("./assets/MSSansSerif.ttf"); }
 * {
   box-sizing: border-box; }
 
@@ -31,8 +31,10 @@ video {
 .blue-bar,
 .action-bar,
 .menu-bar {
-  font-family: 'fs-tahoma', 'Arial', sans-serif;
-  font-size: 18px; }
+  font-family: 'MSSansSerif', 'Arial', sans-serif;
+  font-size: 12px;
+  user-select: none;
+  -webkit-user-select: none; }
 
 .blue-bar {
   height: 30px;
@@ -44,6 +46,10 @@ video {
   display: flex;
   justify-content: space-between;
   box-shadow: inset -1px 0px 0px #000000, inset -2px 0px 0px #808080, inset -3px 0px 0px #C0C0C0, inset 1px 1px 0px #DFDFDF, inset 2px 2px 0px #FFFFFF, inset 3px 3px 0px #C0C0C0; }
+
+.blue-bar .title {
+  display: flex;
+  align-items: center; }
 
 .blue-bar .left-content,
 .blue-bar .right-content {
@@ -78,7 +84,10 @@ video {
   padding: 0px 16px; }
 
 .action {
-  margin-right: 12px; }
+  margin-top: -1px;
+  margin-right: 12px;
+  align-items: center;
+  display: flex; }
 
 span.action-underline {
   text-decoration: underline; }
@@ -95,9 +104,9 @@ span.action-underline {
   height: 30px;
   width: 100vw;
   background: #C0C0C0;
-  padding: 5px;
+  padding: 2px;
   display: flex;
-  box-shadow: inset -1px 0px 0px #FFFFFF, inset 0px -1px 0px #727272, inset 1px 0px 0px #FFFFFF, inset 0px 1px 0px #C0C0C0, inset 0px 2px 0px #DFDFDF; }
+  box-shadow: inset 0px 1px 0px #C0C0C0, inset 0px 2px 0px #DFDFDF; }
 
 .menu-bar-delineator {
   height: 3px;
@@ -106,8 +115,14 @@ span.action-underline {
 
 .start-button {
   padding: 0 5px;
-  height: 20px;
-  font-weight: bold; }
+  height: 26px;
+  font-weight: bold;
+  display: flex;
+  align-items: center; }
+
+.start-button .icon {
+  width: 16px;
+  margin-right: 3px; }
 
 .viewport {
   margin-top: 58px;
@@ -118,7 +133,7 @@ span.action-underline {
 
 .button {
   background: #C0C0C0;
-  box-shadow: inset 2px 2px 0px #DFDFDF, inset 1px 1px 0px #FFFFFF, inset -2px -2px 0px #808080, inset -1px -1px 0px #000000; }
+  box-shadow: inset 1px 1px 0px #FFFFFF, inset 2px 2px 0px #DFDFDF, inset -1px -1px 0px #000000, inset -2px -2px 0px #808080; }
 
 a.button {
   text-decoration: none;
